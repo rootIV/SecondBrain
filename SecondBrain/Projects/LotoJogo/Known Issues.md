@@ -1,5 +1,15 @@
 # Known Issues
 
+## SonarQube token sem permissao de criar projeto
+
+Em 2026-06-07, o scan local chegou a gerar o relatorio e importar cobertura C#, mas falhou no upload com:
+
+```text
+You're not authorized to analyze this project or the project doesn't exist on SonarQube and you're not authorized to create it.
+```
+
+Causa: token sem permissao para criar/analisar o projeto, ou projeto ainda inexistente. Para a primeira analise local, usar token do `admin` ou criar `lotojogo-backend` e `lotojogo-frontend` manualmente no SonarQube.
+
 ## Replica MySQL em volumes existentes
 
 - Caveat: scripts em `docker/mysql/master/init` e `docker/mysql/slave/init` rodam somente na inicializacao de volumes MySQL novos.

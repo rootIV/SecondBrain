@@ -15,6 +15,7 @@ Mapa operacional do vault. Este arquivo e o ponto de entrada para agentes e manu
 - [[LotoJogo - MOC]]: loterias, geracao de apostas, dashboard React, backend .NET, MySQL, Docker e Graphify.
 - [[Aika OG - MOC]]: servidor Aika, protocolo binario, GameServer, TokenServer, services e reverse engineering responsavel.
 - [[Consent - MOC]]: produto de confianca digital para acordos mutuos, consentimento dinamico e Safety Mode.
+- [[MotionInBet - MOC]]: API .NET, bot Windows Forms/Selenium, website React e fluxo de assinaturas via Pix/Mercado Pago.
 
 ## Governanca
 
@@ -44,6 +45,7 @@ Mapa operacional do vault. Este arquivo e o ponto de entrada para agentes e manu
   - `C:\Users\Vitor\Documents\Projects\lotojogo`
   - `C:\Users\Vitor\Documents\Projects\aika_og`
   - `C:\Users\Vitor\Documents\Projects\consent`
+  - `C:\Users\Vitor\Documents\Projects\motioninbet`
 
 ## Observacoes estruturais
 

@@ -1,5 +1,13 @@
 # Decision Log
 
+## 2026-06-07 - SonarQube local gratuito
+
+Decisao: usar SonarQube Community Build local via `docker-compose.sonar.yml`, separado do compose da aplicacao, com PostgreSQL dedicado e volumes persistentes.
+
+Racional: o pedido foi por SonarCloud/SonarQube local gratuito. SonarCloud depende de conta externa e token de organizacao; SonarQube Community Build atende o uso local sem custo. A analise fica dividida em dois projetos: `lotojogo-backend` pelo SonarScanner for .NET e `lotojogo-frontend` pelo SonarScanner CLI, evitando uma configuracao de monorepo fragil para C# e TypeScript. Em 2026-06-07, `sonarqube:lts-community` subiu `9.9.8.100196` e foi marcado como antigo; o compose passou a usar `sonarqube:community` para acompanhar o Community Build atual. Como o upgrade direto do banco `9.9.8` para `26.6.0` exige passar antes por `25.12`, o compose ganhou `name: lotojogo-sonar` para criar volumes novos e evitar migração acidental nesse uso local.
+
+Links: [[Docker]], [[Tests]], [[Backend]], [[Frontend]].
+
 ## 2026-06-05 - Config de estrategias com schema rigido
 
 - Decisao: manter `StrategyConfig.Config` e configs de templates como `JsonElement`, mas validar por allowlist de propriedades e tipos antes de gerar ou persistir.

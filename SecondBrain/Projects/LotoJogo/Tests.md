@@ -49,6 +49,25 @@ npm run build
 npm run lint
 ```
 
+## SonarQube local
+
+Analise gratuita local:
+
+```powershell
+.\scripts\sonar-up.ps1
+$env:SONAR_TOKEN="<token>"
+.\scripts\sonar-scan.ps1
+```
+
+Na primeira analise, o token precisa ser do `admin` ou de um usuario com permissao para criar projetos. Alternativa: criar `lotojogo-backend` e `lotojogo-frontend` manualmente no SonarQube antes de rodar o scan.
+
+Projetos no SonarQube:
+
+- `lotojogo-backend`: usa SonarScanner for .NET, `dotnet build`, `dotnet test` e cobertura OpenCover gerada por `coverlet.collector`.
+- `lotojogo-frontend`: usa SonarScanner CLI em Docker com `sonar-project.properties`, limitado a `lotojogo-front-end/src`.
+
+O scanner .NET fica fixado em `.config/dotnet-tools.json`; rodar `dotnet tool restore` quando necessario. O servidor local fica documentado em [[Docker]].
+
 Estado observado:
 
 - Em 2026-05-13, `npm run build` passou apos a refatoracao de responsabilidades do dashboard.

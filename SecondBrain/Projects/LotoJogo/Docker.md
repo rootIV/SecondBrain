@@ -25,6 +25,39 @@ docker compose --env-file .env up -d --build
 
 O `.env` local usa `COMPOSE_PROFILES=dev`, entao Caddy, API de producao e frontend de producao nao sobem no desenvolvimento.
 
+## SonarQube local
+
+Arquivo:
+
+```text
+docker-compose.sonar.yml
+```
+
+Compose project name: `lotojogo-sonar`.
+
+Servicos:
+
+- `sonarqube`: SonarQube Community Build atual em `http://localhost:9000`.
+- `sonar-db`: PostgreSQL 16 dedicado ao SonarQube.
+
+Uso local:
+
+```powershell
+.\scripts\sonar-up.ps1
+```
+
+O compose do SonarQube e separado do compose da aplicacao para manter analise de qualidade isolada de dev/prod. O servidor usa volumes Docker persistentes para banco, dados, extensoes e logs. Nao usar `docker compose -f docker-compose.sonar.yml down -v` se quiser preservar usuarios, tokens e historico.
+
+Imagem: `sonarqube:community`. Nao usar `sonarqube:lts-community` para este fluxo local porque em 2026-06-07 ela subiu `9.9.8.100196`, que o painel marca como antiga. Como migrar diretamente de `9.9.8` para `26.6.0` falhou com exigencia de passar antes por `25.12`, o compose usa project name separado para criar volumes novos no fluxo local.
+
+Fluxo de analise:
+
+- Criar token em `My Account > Security` no SonarQube.
+- Exportar `SONAR_TOKEN`.
+- Rodar `.\scripts\sonar-scan.ps1`.
+
+Ver tambem [[Tests]].
+
 ## API watch
 
 - `api-dev` define o entrypoint da API como `dotnet watch --project /app/lotojogo-api.csproj run --no-launch-profile`.

@@ -4,17 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "566f3780a9ae080a",
+        "id": "f54db87bf94347a0",
         "type": "tabs",
         "children": [
           {
-            "id": "96fc416de434e3e4",
+            "id": "729c503b07753425",
             "type": "leaf",
             "state": {
-              "type": "graph",
+              "type": "empty",
               "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
         ]
@@ -177,11 +177,30 @@
       "bases:Create new base": false
     }
   },
-  "active": "96fc416de434e3e4",
+  "active": "7bb9f7ed38c7a22b",
   "lastOpenFiles": [
+    "Skills/Aika OG Development Skill.md",
+    "Skills/CleanArchitecture.md",
+    "Skills/Docker Skill.md",
+    "Skills/ReverseEngineering.md",
+    "Skills/React.md",
+    "Second Brain - MOC.md",
+    "Projects/MotionInBet/Security Review - 2026-06-05.md",
+    "Projects/MotionInBet/Roadmap.md",
+    "Projects/MotionInBet/MotionInBet - MOC.md",
+    "Projects/MotionInBet/Graphify.md",
+    "Projects/MotionInBet/Architecture.md",
+    "Knowledge Governance/Maintenance Log.md",
+    "Knowledge Governance/Knowledge Operating Model.md",
+    "Knowledge Governance/Learning Record Template.md",
+    "Knowledge Governance/Knowledge Decisions.md",
+    "Knowledge Governance/Knowledge Debt.md",
+    "Knowledge Governance/Incident Record Template.md",
+    "Knowledge Governance/Health Check.md",
+    "Knowledge Governance/Decision Record Template.md",
+    "Knowledge Governance/Continuous Improvement.md",
     "Projects/Consent/05 - Segurança e privacidade.md",
     "Projects/Consent/04 - Modelo de dados.md",
-    "Projects/Consent/00 - Prompt completo do MVP.md",
-    "Skills/React.md"
+    "Projects/Consent/00 - Prompt completo do MVP.md"
   ]
 }
