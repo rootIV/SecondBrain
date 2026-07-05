@@ -10,16 +10,24 @@ Reduzir consumo de contexto e risco de edicoes fora de escopo. O agente deve bus
 
 - O vault Obsidian correto do projeto e `C:\Users\Vitor\Documents\SecondBrain\SecondBrain\Projects\LotoJogo`.
 - Atualizar notas do projeto somente nesse caminho.
+- Prefixar comandos suportados com `rtk` para reduzir saida e consumo de contexto.
+- Usar comando nativo somente quando o RTK nao oferecer equivalente, quando a saida bruta exata for necessaria ou quando o wrapper falhar.
+- Usar `rtk proxy <comando>` para comandos sem filtro que ainda devem ser rastreados.
 - Quando `graphify-out/graph.json` existir, usar Graphify como primeira fonte de orientacao tecnica sobre codigo, arquitetura, impacto e relacoes entre arquivos.
-- Usar comandos escopados do Graphify antes de varrer arquivos: `graphify query`, `graphify explain` e `graphify path`.
+- Usar comandos escopados do Graphify antes de varrer arquivos: `rtk proxy graphify query`, `rtk proxy graphify explain` e `rtk proxy graphify path`.
 - No PowerShell, definir `$env:PYTHONIOENCODING='utf-8'` antes de consultas Graphify para evitar erro de Unicode.
-- Usar Obsidian como memoria duravel de decisoes, caveats e documentacao, nao como primeira fonte para redescobrir estrutura de codigo.
+- O Graphify usa o Python bundled do Codex em `C:\Users\Vitor\.cache\codex-runtimes\codex-primary-runtime\dependencies\python`.
+- Diagnostico rapido: `Get-Command graphify`, `graphify explain "Hero" --graph .\graphify-out\graph.json` e `python.exe -c "import graphify"` usando o caminho bundled acima.
+- Se o CLI Graphify nao estiver disponivel, consultar diretamente `graphify-out/graph.json` com o runtime Node.js ou Python disponivel antes de fazer buscas amplas.
+- Em toda tarefa, consultar as notas Obsidian relevantes antes de exploracao ampla para recuperar decisoes, caveats e conhecimento geral duravel.
+- Usar Graphify como mapa de relacoes do codigo e Obsidian como memoria duravel; atualizar Obsidian somente quando houver conhecimento duravel novo ou alterado.
+- Quando codigo atual, Graphify e Obsidian divergirem, validar pelo codigo/runtime atual e corrigir a memoria desatualizada relevante.
 - Comecar pelo menor escopo possivel.
 - Expandir o escopo somente quando uma referencia concreta exigir.
 - Nao varrer a pasta pai inteira sem motivo tecnico.
 - Nao ler `node_modules`, `dist`, `bin`, `obj`, `.git`, arquivos gerados ou migrations antigas, salvo quando a tarefa pedir explicitamente.
-- Nao atualizar o vault Obsidian sem pedido explicito do usuario.
-- Quando uma alteracao de codigo ou documentacao mudar contexto relevante, atualizar os outputs Graphify com `graphify update . --force`; para mudancas arquiteturais, regenerar tambem `graphify export callflow-html`.
+- Nao atualizar o vault Obsidian para ajustes efemeros que nao alterem conhecimento duravel.
+- Quando uma alteracao de codigo mudar contexto relevante, atualizar o grafo com `graphify update . --force`; alteracoes semanticas em documentos ou imagens exigem um backend LLM configurado. Para mudancas arquiteturais, regenerar tambem os exports relevantes.
 
 ## Escopos por tipo de tarefa
 
@@ -96,16 +104,16 @@ Nao assumir que a pasta pai e o repositorio Git principal.
 
 1. Identificar se a tarefa e frontend, backend, testes, docs ou infra.
 2. Consultar Graphify quando houver grafo disponivel:
-   - `graphify query "<pergunta>" --graph .\graphify-out\graph.json --budget 1200`
-   - `graphify explain "<servico ou componente>" --graph .\graphify-out\graph.json`
-   - `graphify path "<origem>" "<destino>" --graph .\graphify-out\graph.json`
-3. Rodar `rg --files` apenas no subprojeto relevante quando a consulta apontar arquivos especificos ou o grafo estiver insuficiente.
+   - `rtk proxy graphify query "<pergunta>" --graph .\graphify-out\graph.json --budget 1200`
+   - `rtk proxy graphify explain "<servico ou componente>" --graph .\graphify-out\graph.json`
+   - `rtk proxy graphify path "<origem>" "<destino>" --graph .\graphify-out\graph.json`
+3. Rodar `rtk find`, `rtk grep` ou `rg --files` apenas no subprojeto relevante quando a consulta apontar arquivos especificos ou o grafo estiver insuficiente.
 4. Ler primeiro os arquivos de entrada provaveis da feature.
 5. Editar somente arquivos diretamente relacionados.
 6. Validar com o menor comando suficiente:
-   - frontend: `npm run build` e `npm run lint`;
-   - backend: `dotnet build lotojogo-api.sln`;
-   - testes backend: `dotnet test lotojogo-tests\lotojogo-tests.csproj`.
+   - frontend: `rtk npm run build` e `rtk npm run lint`;
+   - backend: `rtk dotnet build lotojogo-api.sln`;
+   - testes backend: `rtk dotnet test lotojogo-tests\lotojogo-tests.csproj`.
 7. Atualizar Graphify quando a mudanca afetar o mapa futuro do projeto.
 8. Atualizar Obsidian somente se o usuario pedir ou se a mudanca criar decisao/caveat/documentacao duravel.
 

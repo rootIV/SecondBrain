@@ -1,5 +1,24 @@
 # Known Issues
 
+## HTTPS em `www.lotojogo.com.br` - corrigido em 2026-06-24
+
+- Sintoma: `https://www.lotojogo.com.br` falhava com `ERR_SSL_PROTOCOL_ERROR`, enquanto `https://lotojogo.com.br` respondia normalmente.
+- Causa: o DNS `www` resolvia para o servidor correto, mas o `Caddyfile` declarava somente `{$SITE_DOMAIN}` e nao solicitava certificado para `www.{$SITE_DOMAIN}`.
+- Correcao: adicionar um site block para `www.{$SITE_DOMAIN}` que emite TLS e redireciona permanentemente para `https://{$SITE_DOMAIN}{uri}`.
+- Verificacao pendente de deploy: recriar o container Caddy no EC2, confirmar a emissao do certificado nos logs e testar redirect com preservacao de caminho/query.
+- Relacionado: [[Docker]], [[Decision Log]].
+
+## Graphify indisponivel no PATH do Codex - resolvido em 2026-06-24
+
+- Causa: `graphify-out/graph.json` existia, mas o pacote `graphifyy` nao estava instalado no Python bundled usado pelo Codex.
+- Correcao: `graphifyy` instalado em `C:\Users\Vitor\.cache\codex-runtimes\codex-primary-runtime\dependencies\python`; CLI validado com `graphify explain "Hero"`.
+- Integracao: skill instalada em `C:\Users\Vitor\.codex\skills\graphify` e MCP configurado no `.codex/config.toml` do projeto.
+- Observacao: novas sessoes do Codex devem ser abertas para carregar o MCP adicionado.
+- Recorrencia em 2026-06-25: o runtime Python bundled ainda estava no PATH, mas `graphifyy` nao estava mais instalado e `graphify.exe`/`graphify-mcp.exe` nao existiam em `Scripts`.
+- Correcao em 2026-06-25: reinstalado `graphifyy==0.8.49` no runtime bundled, validado `rtk proxy graphify explain "Hero" --graph .\graphify-out\graph.json`, confirmado `Get-Command graphify` apontando para `...\python\Scripts\graphify.exe` e sincronizadas as skills `graphify` em `C:\Users\Vitor\.codex`, `C:\Users\Vitor\.agents` e `C:\Users\Vitor\.claude`.
+- Persistencia: o PATH de usuario ja contem `C:\Users\Vitor\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Scripts`; se uma nova sessao falhar de novo, verificar primeiro se o pacote foi removido do runtime com `python.exe -m pip show graphifyy`.
+- Relacionado: [[Agent Context Rules]], [[Decision Log]].
+
 ## SonarQube token sem permissao de criar projeto
 
 Em 2026-06-07, o scan local chegou a gerar o relatorio e importar cobertura C#, mas falhou no upload com:

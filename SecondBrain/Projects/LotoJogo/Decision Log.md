@@ -1,5 +1,32 @@
 # Decision Log
 
+## 2026-06-24 - Dominio canonico sem www
+
+- Decisao: manter `SITE_DOMAIN` e `FRONTEND_URL` apontando para `lotojogo.com.br` como origem canonica.
+- Decisao: configurar o Caddy para emitir TLS tambem para `www.lotojogo.com.br` e redirecionar permanentemente esse hostname para a origem canonica, preservando caminho e query string.
+- Motivo: o CNAME `www` ja apontava corretamente para `lotojogo.com.br`, mas o Caddy conhecia apenas o hostname sem `www`; por isso o handshake TLS de `https://www.lotojogo.com.br` falhava antes de qualquer redirect HTTP.
+- Tradeoff: `www` permanece apenas como alias de entrada; cookies, OAuth e URLs da aplicacao continuam concentrados na origem sem `www`.
+- Relacionado: [[Docker]], [[Known Issues]].
+
+## 2026-06-24 - Graphify integrado ao runtime do Codex
+
+- Decisao: instalar `graphifyy` no Python bundled do Codex e instalar a skill oficial em `C:\Users\Vitor\.codex\skills\graphify`.
+- Decisao: configurar o MCP Graphify no `.codex/config.toml` do LotoJogo, apontando para `graphify-out/graph.json`.
+- Decisao: manter `multi_agent = true` e `PYTHONIOENCODING=utf-8` na configuracao global do Codex.
+- Decisao: usar `graphify update . --force` para atualizacao incremental somente de codigo, sem depender de uma chave LLM.
+- Atualizacao em 2026-06-25: reinstalar `graphifyy==0.8.49` quando o runtime bundled perder o pacote e manter `...\python\Scripts` no PATH de usuario para que novas sessoes resolvam `graphify` sem ajuste manual.
+- Atualizacao em 2026-06-25: manter as skills `graphify` de `C:\Users\Vitor\.codex`, `C:\Users\Vitor\.agents` e `C:\Users\Vitor\.claude` sincronizadas com a versao instalada para evitar avisos de incompatibilidade.
+- Motivo: o grafo existia, mas o pacote Python/CLI nao estava instalado no runtime que o Codex usa, deixando `graphify` indisponivel no PATH.
+- Relacionado: [[Agent Context Rules]], [[Known Issues]], [[Architecture]].
+
+## 2026-06-24 - Tipografia da Home publica
+
+- Decisao: usar Satoshi nos titulos do Hero e HowItWorks.
+- Decisao: manter `segundos` e `metodo` em italico no titulo do HowItWorks.
+- Decisao: usar Clash Display no `hero__stats-strip`; textos corridos continuam em Satoshi e controles/labels em Inter.
+- Motivo: preservar a direcao visual aprovada pelo usuario e manter uma hierarquia tipografica consistente.
+- Relacionado: [[Frontend]].
+
 ## 2026-06-07 - SonarQube local gratuito
 
 Decisao: usar SonarQube Community Build local via `docker-compose.sonar.yml`, separado do compose da aplicacao, com PostgreSQL dedicado e volumes persistentes.
@@ -20,7 +47,7 @@ Links: [[Docker]], [[Tests]], [[Backend]], [[Frontend]].
 
 - Decisao: usar Graphify primeiro para orientacao tecnica, perguntas de arquitetura, analise de impacto e relacoes entre arquivos quando `graphify-out/graph.json` existir.
 - Decisao: manter Obsidian como memoria duravel para decisoes, caveats e documentacao, mas nao como primeira fonte para redescobrir estrutura de codigo.
-- Decisao: depois de mudancas relevantes em codigo ou documentacao, atualizar outputs Graphify com `graphify update . --force`; para mudancas arquiteturais, regenerar tambem `graphify export callflow-html`.
+- Decisao: depois de mudancas relevantes em codigo, atualizar outputs Graphify com `graphify update . --force`; alteracoes semanticas em documentos ou imagens exigem um backend LLM configurado. Para mudancas arquiteturais, regenerar tambem os exports relevantes.
 - Motivo: reduzir consumo de tokens e evitar releitura ampla de notas/arquivos quando o grafo pode responder por subgrafos menores.
 - Relacionado: [[Agent Context Rules]], [[Architecture]], [[Known Issues]].
 
@@ -583,3 +610,25 @@ Motivo:
 Tradeoff:
 
 - O teto continua global e defensivo, nao uma validacao especifica por categoria. Needs verification se o backend passar a exigir `maxNumbers` exatamente igual a modalidade selecionada.
+# 2026-06-11
+
+## Home pública cinematográfica por capítulos
+
+Decisão atual no código:
+
+- A Home pública `/` foi consolidada em seis capítulos com `HomeStory`.
+- Desktop usa scroll snap obrigatório e parallax por capítulo com Framer Motion.
+- Mobile usa rolagem natural com capítulos de altura mínima de viewport, evitando cortes em conteúdo longo.
+- O trilho lateral mostra o capítulo ativo e permite navegação direta.
+- Os componentes comerciais existentes continuam responsáveis pelo conteúdo e preservam seus IDs públicos.
+- `prefers-reduced-motion` desativa movimento intenso e snap.
+- Em 2026-06-19, a estrutura interna foi refatorada para separar `HomeChapter`, `ChapterRail`, `useActiveHomeChapter` e `HomeStory.types`; capítulos agora declaram `variant`, `motion` e `showCaption` explicitamente.
+- Conteúdos estáticos de seções comerciais foram movidos para `data/*.data.ts`, reduzindo acoplamento entre copy, renderização e comportamento.
+
+Motivo:
+
+- Criar uma experiência de marca única e moderna sem duplicar conteúdo nem comprometer acessibilidade e responsividade.
+
+Tradeoff:
+
+- Alguns capítulos compostos ocultam cards secundários no desktop para caber na viewport; todo o conteúdo continua disponível no mobile.

@@ -3,7 +3,7 @@ tags:
   - project/aika-og
   - auth
   - token-server
-updated: 2026-05-10
+updated: 2026-07-02
 ---
 
 # Aika OG - Sistema de Auth
@@ -41,7 +41,7 @@ sequenceDiagram
     MemberController->>AuthHandlers: GetTokenAsync(id, pw)
     AuthHandlers->>MySQL: SELECT id,passwordHash,status,banDays,tokenCreationTime
     MySQL-->>AuthHandlers: account row
-    AuthHandlers->>AuthHandlers: valida senha e status
+    AuthHandlers->>AuthHandlers: gera MD5 do pw recebido e valida senha/status
     AuthHandlers->>MySQL: UPDATE token, tokenCreationTime
     AuthHandlers-->>MemberController: token ou codigo de erro
     MemberController-->>Client: text/html
@@ -58,7 +58,7 @@ sequenceDiagram
 
 ## Observacoes importantes
 
-- `GetTokenAsync` compara o `passwordHash` recebido diretamente com o valor do banco.
+- `GetTokenAsync` converte o `pw` recebido para MD5 hexadecimal lowercase antes de comparar com `accounts.passwordHash`.
 - `GenerateToken` usa MD5 de um GUID para gerar token hexadecimal.
 - `CreateAccountAsync` ainda usa connection string local propria e tabela/campos que parecem divergentes (`password_hash`, `premiumTime`) em relacao a outros pontos (`passwordHash`, `premiumExpiration`).
 - `GetCharacterCountAsync` espera `pw` como token, nao senha.

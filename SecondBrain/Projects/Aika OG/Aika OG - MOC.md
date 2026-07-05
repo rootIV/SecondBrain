@@ -3,10 +3,14 @@ tags:
   - project/aika-og
   - architecture
   - game-server
-updated: 2026-05-10
+updated: 2026-07-03
 ---
 
 # Aika OG - MOC
+
+## Referencias
+
+- [[Aika OG - Referencias Externas AikaEmu e Delphi]]
 
 Servidor open source otimizado para Aika, dividido em `GameServer`, `TokenServer`, `Shared` e `PacketTool`.
 
@@ -17,6 +21,9 @@ Servidor open source otimizado para Aika, dividido em `GameServer`, `TokenServer
 - [[Aika OG - CharacterService]]
 - [[Aika OG - ItemService]]
 - [[Aika OG - MobService]]
+- [[Aika OG - SkillService]]
+- [[Aika OG - NPC Spawn]]
+- [[Aika OG - WorldDataService]]
 - [[Aika OG - SessionManager]]
 - [[Aika OG - PacketDispatcher e Protocolo]]
 - [[Aika OG Development Skill]]

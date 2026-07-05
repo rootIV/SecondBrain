@@ -76,11 +76,55 @@ src/
 - A aba Gerenciar mostra chips de identificacao para combinacoes, incluindo Fibonacci, exclusao, sequencia maxima, primos, multiplos, final do numero e faixa.
 - `strategies-scroll` usa `useScrollActivity` para exibir a barra de rolagem somente durante interacoes reais de rolagem (`wheel`, toque e teclas), evitando piscar scrollbar ao clicar em controles.
 - Quando a aba Home nao possui estrategias nem apostas manuais, `HomeTab` exibe um estado vazio: "Lista de estratégias vazia. Adicione ou carregue estratégias."
+- Em 2026-07-02, a lista normal de estrategias da aba Home passou a paginar uma estrategia por vez; apostas manuais usam uma pagina propria que mostra todas as manuais da categoria atual.
+- Em 2026-07-02, `strategies-scroll__toolbar` saiu de dentro de `strategies-config-div` e fica como acao propria da aba Home, acima do frame de estrategias.
+- Ao adicionar ou clonar estrategia na aba Home, a paginacao avanca diretamente para a pagina da estrategia criada.
+- A paginacao da Home usa um controle compacto com seta esquerda, texto central da pagina atual e seta direita, em vez de dots numerados.
 - `strategies-scroll` reserva padding interno para que o brilho de `strategy-card` nao seja cortado pelo container rolavel.
 - `strategy-card` usa `overflow: visible` para preservar o glow externo, mantendo a camada de brilho interna limitada por `border-radius`.
 - Em celulares ate 640px, a aba Home nao usa mais limite fixo de `76px` na area de estrategias; os minicards mantem altura natural e o documento principal assume a rolagem no layout responsivo.
+- Ate 1024px, `right-config__content`/`home-tab` nao usam rolagem interna na Home; o conteudo expande em altura natural e a pagina principal assume a rolagem.
 - `strategies-scroll` define seus filhos como `flex: 0 0 auto` para impedir que `StrategyBaseCard` e paineis inline encolham dentro do container rolavel no desktop.
 - `strategy-card__cost-preview` fica alinhado no canto direito da linha de quantidade de apostas e usa largura compacta para caber em 320px.
+
+## Home pública
+
+- A rota `/` monta seis capítulos: `Hero`, `HowItWorks`, `Features`, `Benefits`, `Pricing` e o fechamento com `CTA` + `Footer`.
+- `HomeStory` organiza a Home em capítulos com scroll interno, navegação lateral e parallax seletivo; a estrutura foi separada em `HomeChapter`, `ChapterRail`, `useActiveHomeChapter` e tipos compartilhados.
+- Cada capítulo declara `variant`, `motion` e `showCaption` explicitamente; não há mais decisão de parallax baseada em `className.includes`.
+- Dados estáticos de `HowItWorks`, `Features`, `Benefits`, `Pricing` e `Footer` vivem em arquivos `data/*.data.ts`, deixando os componentes focados em renderização e interação.
+- `Hero` usa `public/media/lotojogo-hero-dark.png` como fundo escuro com loop cinematográfico em CSS (`pan/zoom` e varredura de luz), preservando `prefers-reduced-motion`; `HowItWorks` usa capítulo escuro com marquee contínuo de modalidades.
+- A seção `Pricing` usa palco e fundo escuros em vinho/plum, distintos do fundo roxo do capítulo de produto.
+- `chapter-closing` reúne CTA e footer em uma pilha responsiva; o footer usa superfície translúcida escura e deve permanecer integralmente dentro dos limites do capítulo.
+- IDs públicos das seções preservam links âncora do menu.
+- `prefers-reduced-motion` reduz ou remove animações nos componentes que oferecem essa regra.
+
+### Tipografia e encaixe da Home
+
+- A tipografia aprovada usa Satoshi nos titulos principais do Hero, Inter no `hero__subtitle`, Syne nos titulos de `hero__metrics`, no titulo principal de HowItWorks, no marquee de modalidades e nos titulos das etapas; Inter permanece em controles/labels e no `hero__stats-strip`.
+- O `hero__stats-strip` usa tamanhos fixos por faixa responsiva e `white-space: nowrap` no desktop para evitar que os indicadores quebrem ou sejam cortados ao lado de `hero__metrics`.
+- Em Mobile S ate Mobile L, os separadores de `hero__stats-item` sao linhas horizontais roxas de largura integral no topo de todos os itens, incluindo o primeiro.
+- Em Mobile S ate Mobile L, `hero__stats-strip` centraliza os indicadores e fecha o conjunto com uma linha roxa abaixo do ultimo item.
+- Em tablet, `hero__stats-strip` mantem linhas verticais somente entre os itens. No layout compacto entre 1024px e 1180px, os indicadores ficam centralizados nos dois eixos e o conjunto recebe linhas horizontais superior e inferior; desktops maiores com pouca altura continuam sem essas adicoes.
+- Entre 320px e 480px, o titulo principal usa quebra balanceada e margem de seguranca na direita para evitar clipping.
+- O Hero oferece o CTA secundario `Saiba mais`, com link direto para `#how-it-works-section`, preservando `Criar estrategia gratis` como acao principal.
+- A comunicacao principal da Home usa a promessa `Gere jogos inteligentes em segundos` seguida de `Aposte com mais criterio, menos improviso`, com subheadline orientada a filtros, historico e controle.
+- Os CTAs `Criar estrategia gratis` e `Saiba mais` permanecem lado a lado em todas as faixas; ate 480px usam duas colunas iguais e, a partir de 1024px, o CTA principal deixa de impor largura minima de 360px.
+- Os CTAs do Hero usam acabamento glass em formato pill; o CTA principal recebe gradiente magenta/roxo e o secundario fica translucido para manter hierarquia visual sem alterar rotas ou comportamento.
+- O `hero__stats-strip` não usa container/glass próprio; o roxo deve aparecer somente como separador entre conteúdos. Em desktop grande, incluindo 1920x917 até 4K, os textos ficam centralizados em colunas responsivas.
+- O `hero__metrics` usa acabamento editorial discreto com superfície escura translúcida, borda leve e sem neon/glow forte.
+- O login desktop do Hero reutiliza `useAuth`: mostra `Entrar` para visitantes e `Dashboard` apontando para `/dashboard` quando o usuário já está autenticado.
+- O CTA de HowItWorks usa o mesmo vocabulário visual magenta/roxo do CTA principal do Hero, mantendo o comportamento de cadastro.
+- O Hero exibe a microcopy `Comece sem cartao. Configure seus criterios em menos de 1 minuto.` e recorta 4px do topo da midia para esconder artefatos do primeiro quadro do video.
+- HowItWorks usa o titulo `Da ideia ao jogo pronto em 3 passos.` e apresenta o fluxo `Escolha a modalidade -> Defina seus criterios -> Gere combinacoes`, com CTA para montar a primeira estrategia.
+- Os depoimentos da Home sao ordenados como Carla, Felipe e Marcos e enfatizam criterios salvos, comparacao de padroes e organizacao de boloes.
+- Nos capitulos `chapter-proof`, `chapter-pricing` e `chapter-closing`, Syne e usada nos titulos principais e nomes de planos; Inter e usada em textos corridos, avaliacoes, autores, labels, precos, controles, formulario e footer. A aspas decorativa de `chapter-proof` permanece serifada.
+- No titulo do HowItWorks, o destaque atual e `3 passos.` em italico, preservando a quebra semantica do titulo.
+- O layout desktop do HowItWorks compacta titulo, cards e CTA dentro de `100svh` para impedir que o botao seja cortado pelo `overflow: hidden` do capitulo.
+- Entre 320px e 375px, o HowItWorks reduz titulo, margens e padding dos cards de etapas sem remover os blocos semanticos do titulo.
+- Entre 1024px e 1180px, `chapter-proof` reserva um corredor de 96px a direita para impedir sobreposicao dos reviews com `chapter-nav`.
+- Os headers de `chapter-pricing` e o CTA de `chapter-closing` usam wrappers com largura limitada e clamps dedicados para evitar clipping entre Mobile S e tablet.
+- Em desktops largos com pouca altura util (`min-width: 1600px` e `max-height: 980px`), `pricing-stage` usa uma variante compacta para evitar ocupar visualmente todo o height do capítulo em telas como 1920x917.
 
 ## ManageTab
 
@@ -103,21 +147,43 @@ src/
 - O planejamento aprovado em [[Dashboard Redesign]] direciona o proximo redesign para **Tactical Intelligence Dark** com enfase em dashboard operacional denso e fluxo guiado por etapas (`categoria -> estrategias -> revisao -> lote -> historico`).
 - O redesign planejado introduz `TopNav`, `CategoryDrawer`, `ProfilePage`, page transitions e footer global, mas deve preservar hooks/services existentes e a logica de geracao/gerenciamento.
 - Em 2026-05-25, a fase base do [[Dashboard Redesign]] instalou `framer-motion`, adicionou `TopNav`, `CategoryDrawer`, `Footer`, `ProfilePage`, transicoes de rota e aliases `/dashboard`, `/login`, `/register` e `/profile`, mantendo compatibilidade com `/dashboardPage`, `/loginPage` e `/registerPage`.
-- O `TopNav` substitui a `LeftSideBar` no fluxo principal da dashboard e usa `lotteryCategories`, `useLotes`, `useAuthActions`, `useTheme` e `useAuth` para categorias, badges, logout, tema e usuario.
+- O `TopNav` substitui a `LeftSideBar` no fluxo principal da dashboard e usa `useAuthActions`; a selecao de categoria fica no `MainCard`.
 - O `TopNav` foi ajustado para o padrao visual mini-navbar: pill flutuante centralizada, logo abstrato de quatro pontos, links com hover vertical, botoes compactos e formato que muda de `rounded-full` para card arredondado quando menus/dropdowns estao abertos.
+- Em 2026-06-25, o `TopNav` da dashboard passou a seguir o menu transparente da Home: ocupa 100% da viewport, mostra apenas `PERFIL`, `CATEGORIA`, `TERMOS` e `SAIR`, e no mobile abre um painel transparente com altura de viewport.
+- Em 2026-06-25, o shell desktop da dashboard passou a alinhar `TopNav`, `dashboard-layout` e `app-footer` pelo mesmo gutter a partir de 1201px; `CategoryDrawer` removeu blur/backdrop-filter e usa animacao curta baseada em transform/opacity para evitar reflexo e custo alto em celulares.
+- Em 2026-07-02, a selecao de categoria saiu do `TopNav`; o canto direito foi reduzido para um pill com avatar por iniciais que alterna tema via `useTheme` e botao `Sair` que chama logout.
+- Em 2026-07-02, o `TopNav` passou a mostrar saudacao local (`Bom Dia`, `Boa Tarde` ou `Boa Noite`), nome do usuario, separador vertical e `Sair`; o avatar por iniciais continua alternando tema.
+- Em 2026-07-03, o `TopNav` ganhou uma engrenagem apos a saudacao; o tooltip abre por clique, fecha por Escape/clique externo e oferece as acoes reais `Tema` e `Perfil`.
 - A dashboard nao renderiza mais `RightProfileStatusBar`/`right-profile-area`; a `right-config-area` ocupa a altura lateral disponivel ao lado do painel principal.
 - `DashboardMain` nao renderiza mais `dashboard-header__brand` nem `dashboard-flow`; o `dashboard-ticker` assume o topo do painel principal.
 - O footer global foi adaptado para uma estrutura tipo 21st.dev: marca/logo, botoes sociais circulares, links principais, links legais e copyright/aviso de jogo responsavel.
 - As categorias de loteria ficam em `domain/lottery/categories.ts`.
 - Os precos de apostas ficam em `domain/lottery/pricing.ts`.
 - A regra de merge/substituicao do `GeneratedBetsCard` fica fora da pagina em `features/dashboard/generatedBetGroups.ts`.
-- O `MainCard` usa `dashboard-card__selection-panel` no cabecalho do card.
+- O `MainCard` usa `dashboard-card__selection-panel` dentro de `card-button`, mantendo selecao de dezenas e aposta manual juntos no rodape do card.
+- O `MainCard` exibe todas as categorias de loteria em baloes ao lado direito do titulo dentro de `dashboard-card__header`; clicar em uma categoria muda a categoria ativa e atualiza titulo/limites do card.
+- O `MainCard` rotula os campos tracejados com `Categorias:`, `Selecione:` e `Adicione manualmente:`.
+- O `MainCard` exibe a selecao atual e apostas manuais ja adicionadas em chips numericos dentro de `card-button__manual-bets`.
+- O input `Adicione manualmente:` aceita dezenas separadas por virgula para preencher a selecao atual; duplicados e limites exibem aviso pequeno sem salvar aposta automaticamente.
+- Em 2026-07-02, o input `Adicione manualmente:` passou a manter o texto editavel enquanto sincroniza a linha `Atual` em tempo real; apagar um numero do texto ou usar o `x` do chip remove somente o numero do rascunho atual, sem alterar apostas manuais ja adicionadas.
+- Em 2026-07-02, `Super Sete` ganhou layout visual proprio no `MainCard`: 7 colunas com digitos `0` a `9`, usando codificacao interna por coluna para permitir repetir digitos em colunas diferentes sem alterar contratos do backend.
+- Em 2026-07-03, a visualizacao do `Super Sete` passou a renderizar 7 colunas reais (`dashboard-card__super-sete-board`) com label `Col. 1` a `Col. 7`, em vez de depender de `grid-auto-flow`; os breakpoints compactam gaps, labels e celulas mantendo as 7 colunas de mobile S ate 4K.
+- Em 2026-07-03, o tabuleiro do `Super Sete` passou a limitar largura e altura das celulas por viewport para impedir que as 7 colunas gerem quadrados gigantes em 1920x917, laptop L e 4K; a compactacao geral de dezenas fica restrita de tablet ate laptop para preservar a Lotomania em 4K.
+- Em 2026-07-03, a correcao do `Super Sete` removeu os overrides antigos com `grid-auto-flow`/linhas `1fr` que reapareciam em tablet, laptop L, 1920x917 e 4K; o JSX agora usa `dashboard-card__super-sete-board` com colunas independentes e celulas de altura fixa compacta.
+- Em 2026-07-03, Mobile S ate Mobile L do `Super Sete` voltou aos tamanhos anteriores: 26px ate 520px e 24px ate 340px, mantendo a compactacao nova apenas de tablet para cima.
+- Em 2026-07-02, `strategy-pagination` saiu de dentro de `strategies-scroll` e passou a ficar preso ao rodape do painel de estrategias, permanecendo visivel enquanto a estrategia rola.
+- Em 2026-07-02, o rodape de `card-actions` passou a manter `card-button__header` e `card-button__manual-bets` na area esquerda, com `dashboard-card__selection-panel` no canto superior direito e `card-button__manual-actions` abaixo.
+- Em 2026-07-03, `card-button__manual-actions` passou a pertencer visualmente ao `dashboard-card__selection-panel`; de tablet ate 4K, `card-button__manual-bets` estica para alinhar seu fundo ao fundo dos botoes, e em mobile S ate mobile L a ordem visual fica cabecalho manual, apostas manuais, aviso e painel de quantidade.
+- Em 2026-07-02, Quina e Timemania usam classe visual `dashboard-card--wide-number-grid` para compactar grades de 80 numeros somente em desktop/laptop de pouca altura.
+- Para Lotomania, o `MainCard` ativa modo denso quando `maxNumbers >= 100`, reduzindo celulas/gaps para exibir 100 numeros sem rolagem interna em layouts desktop.
+- Em 2026-07-02, a compactacao forte da Lotomania foi limitada aos breakpoints de pouca altura, mantendo quadrados em tamanho normal em telas 4K.
+- `dashboard-card__lote-slot` nao e mais renderizado no dashboard; o `LoteShowcaseCard` permanece preservado para reutilizacao futura.
 - O titulo `dashboard-card__header h2` usa efeito de metal liquido em CSS: movimento lento continuo no gradiente do texto e reflexo forte raro em ciclo longo.
 - O `dashboard-card__header` usa a mesma geometria entre tema claro e escuro; a troca de tema altera somente paleta, fundo, borda, sombra e mascara de cor do titulo.
 - No tema claro, o `dashboard-card__header` segue a paleta roxa/rosa da dashboard e evita degradê branco no texto para manter legibilidade.
-- O contador `dashboard-card__counter` fica acima do dropdown dentro de `dashboard-card__selection-panel`, com o rotulo `Marcar:` alinhado a esquerda.
-- O dropdown `dashboard-card__dozen-select` fica abaixo do contador, mantendo o controle de quantidade perto do estado "selecionados / limite".
-- `card-actions` posiciona a acao de aposta manual no lado direito; `Limpar` usa icone de lixeira e `Adicionar` usa icone de correto.
+- O contador `dashboard-card__counter` e `card-button` ficam ancorados no rodape do `dashboard-card`, enquanto a grade de dezenas ocupa a area flexivel central.
+- O dropdown `dashboard-card__dozen-select` fica dentro de `card-button`, mantendo o controle de quantidade perto da acao de aposta manual.
+- `card-actions` posiciona a acao de aposta manual no lado direito, sem borda superior; `Limpar` usa icone de lixeira e `Adicionar` usa icone de correto.
 - Em telas estreitas, o bloco de selecao empilha abaixo do titulo para evitar quebra visual.
 - `DashboardPage` rastreia o `loteId` exibido no `GeneratedBetsCard`.
 - Ao clicar em apostas diferentes do mesmo lote na aba [[Frontend|Gerenciar]], somente o `MainCard` muda a selecao; o `GeneratedBetsCard` nao recebe novos grupos.

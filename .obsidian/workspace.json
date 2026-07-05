@@ -8,16 +8,6 @@
         "type": "tabs",
         "children": [
           {
-            "id": "4943105f32fc9f3d",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
-            }
-          },
-          {
             "id": "45969b77d7aa88b2",
             "type": "leaf",
             "state": {
@@ -45,8 +35,7 @@
               "title": "Agent Context Rules"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -205,11 +194,15 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false
+      "bases:Create new base": false,
+      "obsidian-excalidraw-plugin:New drawing": false,
+      "omnisearch:Omnisearch": false
     }
   },
   "active": "45969b77d7aa88b2",
   "lastOpenFiles": [
+    "SecondBrain/Projects/Aika OG/Services/Aika OG - CharacterService.md",
+    "SecondBrain/Projects/Aika OG/Tools/Aika OG - MasterEditor File Crypto.md",
     "SecondBrain/Projects/LotoJogo/LotoJogo - MOC.md",
     "SecondBrain/Projects/LotoJogo/LotteryDraws.md",
     "SecondBrain/Projects/LotoJogo/Repository Pattern.md",

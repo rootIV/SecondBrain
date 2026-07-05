@@ -114,6 +114,8 @@ Decisoes atuais:
 - MySQL nao publica porta no host; apenas containers da rede Compose acessam `db:3306` e `db-slave:3306`.
 - API nao publica porta no host; Nginx do frontend faz proxy para `api:8080`.
 - Caddy publica `80` e `443`, emite/renova TLS automaticamente e faz proxy para `frontend:80`.
+- Caddy emite TLS para o dominio canonico definido em `SITE_DOMAIN` e para `www.${SITE_DOMAIN}`.
+- Requisicoes para `www.${SITE_DOMAIN}` recebem redirect permanente para `https://${SITE_DOMAIN}{uri}`, preservando caminho e query string.
 - Frontend Nginx nao publica porta no host em producao; fica acessivel apenas pela rede Compose via Caddy.
 - Nginx proxy deve cobrir todos os prefixes de API usados pelo frontend, incluindo `/Generate` e o alias legado `/generate`; sem isso, `POST /generate` cai no fallback estatico e retorna `405 Not Allowed`.
 - Nginx preserva `X-Forwarded-Proto` recebido de um proxy/TLS terminator externo; se nao houver header externo, usa o scheme local.
@@ -210,6 +212,8 @@ Antes de considerar o deploy pronto para usuarios reais:
 - Manter segredos sensiveis em Docker secrets ou migrar para AWS Secrets Manager, AWS SSM Parameter Store ou outro gerenciador equivalente. O `.env` deve guardar apenas caminhos/valores nao sensiveis e nunca ser versionado.
 - Confirmar que Security Group nao expoe `3306` e que SSH fica restrito ao IP do operador.
 - Recriar containers com `docker compose up -d --build --force-recreate` apos mudar as variaveis.
+- Depois de alterar o `Caddyfile`, recriar ao menos o servico com `docker compose --env-file .env up -d --force-recreate caddy` e verificar `docker compose --env-file .env logs --since 10m caddy`.
+- Validar que `https://www.${SITE_DOMAIN}/login?next=%2Fdashboard` negocia TLS e redireciona para `https://${SITE_DOMAIN}/login?next=%2Fdashboard`.
 
 ## Replicacao MySQL em dev
 
