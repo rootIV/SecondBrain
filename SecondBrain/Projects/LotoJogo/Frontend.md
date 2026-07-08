@@ -54,7 +54,9 @@ src/
 - Criar estrategia salva usa a configuracao atual de `StrategyInstance[]`.
 - Editar config ainda usa JSON de `items` para preservar o contrato antes de uma UI estruturada por strategy.
 - O fluxo local de templates tambem salva/restaura estrategias `manual` junto das estrategias configuradas.
-- A `strategy-select-div` da aba Home possui acao de limpar todas as estrategias e apostas manuais da categoria atual, com painel de confirmacao antes de remover.
+- Em 2026-07-06, a criacao de estrategias da aba Home passou a usar `strategy-creation-panel` com IDs estaveis para `Categoria:`, `Algoritmo:` e defaults, evitando IDs React `_r_*` no DOM.
+- Em 2026-07-06, `strategies-config-div` mostra a categoria atual no cabecalho e oferece busca com blur por estrategias e apostas manuais em rascunho agrupadas por categoria; abrir um item troca para a categoria correta e posiciona a paginacao.
+- Em 2026-07-06, `strategy-pagination` permanece visivel sempre que existe ao menos uma pagina de estrategia/manual, inclusive exibindo `Estratégia 1 de 1` com setas desabilitadas quando ha pagina unica.
 - Depois de uma geracao bem-sucedida, a aba Home limpa automaticamente as estrategias configuradas e apostas manuais usadas na geracao.
 - A aba Home persiste rascunho local em `localStorage` para sobreviver a refresh acidental, incluindo estrategias configuradas, defaults, estrategia selecionada e apostas manuais por categoria.
 - O rascunho local da Home e limpo/substituido quando o usuario limpa estrategias, aplica template ou conclui uma geracao com sucesso.

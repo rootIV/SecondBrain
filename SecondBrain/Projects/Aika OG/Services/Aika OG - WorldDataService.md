@@ -5,7 +5,7 @@ tags:
   - world-data
   - mob
   - npc
-updated: 2026-07-03
+updated: 2026-07-06
 ---
 
 # Aika OG - WorldDataService
@@ -40,9 +40,11 @@ Relacionado: [[Aika OG - MobService]], [[Aika OG - NPC Spawn]]
 - Se nenhum caminho existir, o servidor inicia com listas vazias e loga aviso.
 - `WorldDataService.Npcs` alimenta `NpcService`.
 - `WorldDataService.Mobs` alimenta `MobService.SendVisibleMobs`.
+- Apos carregar mobs/NPCs, `WorldDataService.Load` chama `WorldEntitySpatialIndex.Rebuild` para preparar consultas por range sem scan global.
+- Quando nenhum caminho existir, as listas ficam vazias e o indice espacial tambem e reconstruido vazio.
 
 ## Limites
 
 - Esta etapa implementa carga, registro em memoria e spawn por visibilidade.
-- IA de mobs, ataque, pathing e respawn completo ainda nao foram implementados.
+- Pathing avancado e skills complexas de mob ainda nao foram implementados.
 - `MobPos.bin` nao foi usado nesta etapa; a source Delphi atual usa principalmente os CSVs para mobs comuns.

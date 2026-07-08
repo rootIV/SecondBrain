@@ -3,7 +3,7 @@ tags:
   - project/aika-og
   - service
   - item
-updated: 2026-07-04
+updated: 2026-07-06
 ---
 
 # Aika OG - ItemService
@@ -53,6 +53,8 @@ Em 2026-07-03 entrou o primeiro corte do sistema de inventario/equipamento basea
 - Personagem novo recebe itens iniciais nos slots `0..5`: `12513`, `12543`, `12573`, `12088`, `12483`, `12333`.
 - Slot `120` recebe o marcador de bolsa `5300`, conforme `TPacketHandlers.CreateCharacter` da source Delphi.
 - O item no slot `120` libera a primeira pagina da mochila (`0..19`); ele nao e item de conteudo da mochila.
+- Atirador (`classValue 2`) inicia com `Bala de Rifle - Categoria F -` (`4616`) equipada no slot `15` e mais um stack de `1000` no primeiro slot livre do inventario.
+- Pistoleira (`classValue 3`) inicia com `Bala de Pistola - Categoria F -` (`4601`) equipada no slot `15` e mais um stack de `1000` no primeiro slot livre do inventario.
 - Slots `121..125` ficam vazios neste corte e serao liberados por mecanica futura.
 - `CharacterRepository.CreateCharAsync` persiste tanto equips quanto inventario inicial; antes so persistia equips.
 - Refresh de item por login e movimentacao de inventario/equipamento usa `notice=false`, para nao anunciar bolsa ou item ja existente no chat.
@@ -87,8 +89,10 @@ Em 2026-07-03 entrou o primeiro corte do sistema de inventario/equipamento basea
 
 ## Comandos de desenvolvimento
 
-- `.item <id> [quantidade]` cria item no primeiro slot de inventario desbloqueado e vazio.
-- O comando valida `ItemTemplateService.Templates`, preenche `ItemId/App`, quantidade/refine, durabilidade, persiste no banco e envia refresh `0xF0E` com `notice=false`.
+- `.item <id> [quantidade]` cria a quantidade pedida como itens individuais nos primeiros slots de inventario desbloqueados e vazios.
+- O comando usa apenas slots de conteudo `0..119`; slots `120..125` continuam reservados para marcadores de bolsa.
+- Se nao houver espaco para todos os itens pedidos, nao altera o inventario e envia a mensagem `Inventario cheio`.
+- O comando valida `ItemTemplateService.Templates`, preenche `ItemId/App`, `Refine=1`, durabilidade, persiste no banco e envia refresh `0xF0E` com `notice=false` para cada slot criado.
 
 ## Pontos de cuidado
 
@@ -96,4 +100,4 @@ Em 2026-07-03 entrou o primeiro corte do sistema de inventario/equipamento basea
 - `MinimalValue` e `MaxValue` sao convertidos para byte no pacote.
 - `ItemList.bin` e lido a partir do offset `0`; o arquivo tem sobra no final, nao cabecalho inicial de 4 bytes.
 - O layout do packet `0xF0E` foi coberto por teste de caracterizacao antes da refatoracao.
-- O primeiro corte nao implementa storage, guild chest, pran, cash, uso de item, buff, compra/venda, refinamento ou drops.
+- O primeiro corte nao implementa storage, guild chest, pran, cash, uso de item, buff, refinamento ou drops.

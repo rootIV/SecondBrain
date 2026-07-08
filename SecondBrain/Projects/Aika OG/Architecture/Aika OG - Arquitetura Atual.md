@@ -2,7 +2,7 @@
 tags:
   - project/aika-og
   - architecture
-updated: 2026-05-10
+updated: 2026-07-06
 ---
 
 # Aika OG - Arquitetura Atual
@@ -42,10 +42,14 @@ Arquivos principais:
 - `GameServer/Application/Services/MobService.cs`
 - `GameServer/Application/Sessions/Session.cs`
 - `GameServer/Application/Sessions/SessionManager.cs`
+- `GameServer/Application/Sessions/OutboundPacketQueue.cs`
 - `GameServer/Application/World/WorldGrid.cs`
+- `GameServer/Application/World/WorldEntitySpatialIndex.cs`
 - `GameServer/Application/Handlers/Game/*Handler.cs`
 
 Responsabilidade: coordenar fluxo de jogo, sessao ativa, criacao/listagem de personagens, escrita de pacotes de alto nivel e visibilidade no mundo.
+
+Atualizacao 2026-07-06: visibilidade usa dois indices runtime. `WorldGrid` rastreia personagens por celula e e atualizado no movimento/logout/teleporte; `WorldEntitySpatialIndex` indexa mobs/NPCs carregados e atualiza mobs quando AI move, reseta ou respawna.
 
 ### Infrastructure
 
@@ -54,11 +58,13 @@ Arquivos principais:
 - `GameServer/Infrastructure/Networking/TcpGameServer.cs`
 - `GameServer/Infrastructure/Networking/INetwork.cs`
 - `GameServer/Infrastructure/Buffers/BufferManager.cs`
-- `GameServer/Infrastructure/Buffers/RingBuffer.cs`
+- `GameServer/Infrastructure/Buffers/RingBuffer.cs` (legado; nao usado pelo envio atual de `Session`)
 - `GameServer/Infrastructure/Persistence/GameDatabase.cs`
 - `GameServer/Infrastructure/Persistence/Repositories/*Repository.cs`
 
 Responsabilidade: detalhes externos, como socket TCP, pool de buffers, conexao MySQL e consultas SQL.
+
+Atualizacao 2026-07-06: `TcpGameServer` centraliza o aluguel/devolucao de `SocketAsyncEventArgs` e coordena `BufferManager` para os buffers de leitura. `SessionManager` nao possui mais pool privado de socket args nem pool de `Session`.
 
 ### Presentation
 
@@ -99,5 +105,9 @@ flowchart TD
 
 - `EncDec` e keys sao contrato binario com o cliente.
 - `PacketStream` preserva escrita/leitura little-endian usada pelos pacotes.
+- `PacketPool.Return` reseta streams e limita retencao; factories devem chamar `GetBytes()` antes de devolver o stream ao pool.
 - `PacketFactory.FinalizePacket` escreve tamanho nos dois primeiros bytes.
+- `Session.SendPacket` usa fila outbound por pacote e apenas um `SendAsync` ativo por sessao; `RingBuffer` nao participa mais do envio de sessao.
+- `SessionManager` mantem indice O(1) de character id para sessao; broadcasts devem usar `VisibilityBroadcastService`.
+- AI/visibilidade/broadcast nao devem voltar a fazer scans globais de sessoes/mobs/NPCs nos loops quentes.
 - Repositorios ainda fazem SQL direto; uma evolucao futura seria introduzir interfaces em `Application` e implementacoes em `Infrastructure`.

@@ -26,6 +26,7 @@ Servidor open source otimizado para Aika, dividido em `GameServer`, `TokenServer
 - [[Aika OG - WorldDataService]]
 - [[Aika OG - SessionManager]]
 - [[Aika OG - PacketDispatcher e Protocolo]]
+- [[Aika OG - AIKA.exe Win32 Dialogs]]
 - [[Aika OG Development Skill]]
 
 ## Regras sensiveis

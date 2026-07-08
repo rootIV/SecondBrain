@@ -3,7 +3,7 @@ tags:
   - project/aika-og
   - service
   - combat
-updated: 2026-07-04
+updated: 2026-07-05
 ---
 
 # Aika OG - CombatService
@@ -21,8 +21,9 @@ Relacionado: [[Aika OG - CharacterService]], [[Aika OG - MobService]], [[Aika OG
 3. `CombatService` aceita `SkillId = 0` ou uma skill basica ativa do personagem, valida arma equipada, mob vivo/visivel e range inicial `35`.
 4. `DamageCalculator` calcula dano fisico basico com ataque do personagem e defesa do mob.
 5. `CombatPacketFactory` monta `TRecvDamagePacket` (`0x102`) e o handler envia ao cliente.
-6. Se o mob sobreviver e a IA estiver em alcance, `MobAiService.AttackPlayer` calcula dano basico do mob contra o jogador.
-7. Dano mob -> jogador envia `0x102` e tambem `0x1002` para efeito visual/numero vermelho quando necessario, depois atualiza HP/MP.
+6. Se o mob morrer, `CombatHandler`/`SkillHandler` chamam `MobRewardService.ProcessKill` uma unica vez para conceder EXP/drop, persistir o estado no handler e disparar refresh.
+7. Se o mob sobreviver e a IA estiver em alcance, `MobAiService.AttackPlayer` calcula dano basico do mob contra o jogador.
+8. Dano mob -> jogador envia `0x102` e tambem `0x1002` para efeito visual/numero vermelho quando necessario, depois atualiza HP/MP.
 
 ## Packet 0x102
 
@@ -58,5 +59,5 @@ Relacionado: [[Aika OG - CharacterService]], [[Aika OG - MobService]], [[Aika OG
 - Retorno basico envia animacao, mas ainda nao teleporta.
 - Sem PvP.
 - Mob -> jogador ainda e ataque basico de IA, sem skills complexas de mob.
-- Respawn de mob e drops diretos no inventario existem em v1; EXP por kill ainda nao esta completa.
+- Respawn de mob, EXP por kill e drops diretos no inventario existem em v1. `DropDataService` tenta lista por nome, por `DropIndex` e fallback por faixa `Monsters_0_20`, `Monsters_21_40`, etc.
 - Sem buffs/debuffs, dungeons, party/guild/nation e regras especiais de cidade.
