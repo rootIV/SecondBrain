@@ -3,7 +3,7 @@ tags:
   - project/aika-og
   - protocol
   - packets
-updated: 2026-07-05
+updated: 2026-07-14
 ---
 
 # Aika OG - PacketDispatcher e Protocolo
@@ -17,6 +17,10 @@ Arquivos:
 - `GameServer/Presentation/Packets/PacketDispatcher.cs`
 - `GameServer/Presentation/Packets/PacketStream.cs`
 - `GameServer/Presentation/Packets/PacketFactory.cs`
+- `GameServer/Application/Handlers/Game/PartyHandler.cs`
+- `GameServer/Application/Services/Parties/PartyService.cs`
+- `GameServer/Application/Services/Parties/PartyPacketFactory.cs`
+- `GameServer/Application/Services/Parties/PartyPacketParser.cs`
 - `GameServer/Network/EncDec.cs`
 
 ## Responsabilidade
@@ -46,7 +50,15 @@ A camada de protocolo recebe bytes da rede, normaliza o buffer, valida tamanho, 
 | `0x314` | `NpcShopHandler.SellItem` |
 | `0x31C` | `SkillHandler.LearnSkill` |
 | `0x31E` | `SkillHandler.ChangeItemBar` |
+| `0x320` | `SkillHandler.UseSkill` |
+| `0x322` | `PartyHandler.Invite` |
+| `0x323` | `PartyHandler.AnswerInvite` |
+| `0x324` | `PartyHandler.Kick` |
+| `0x325` | `PartyHandler.DestroyOrLeave` |
+| `0x326` | `PartyHandler.ChangeAllocation` |
 | `0x329` | `SkillHandler.RemoveBuff` |
+| `0x338` | `PartyHandler.SendPosition` |
+| `0x34B` | `PartyHandler.GiveLeader` |
 | `0x305` | `CharacterHandler.UpdateRotation` |
 | `0x306` | `CharacterHandler.UpdateCharInfo` |
 | `0x32C` | `ItemHandler.DeleteItem` |
@@ -79,7 +91,15 @@ A camada de protocolo recebe bytes da rede, normaliza o buffer, valida tamanho, 
 - `0x31E`: refresh/confirmacao de barra de skill/item com sender `0x7535`, campos `DestSlot`, `SrcType`, `SrcIndex`.
 - `0x348`: entrada de fechamento de NPC/opcao (`TSignalData`), limpa estado aberto e responde com sinal `0x10F`.
 - `0x361` / `0x3061`: ativacao de titulo. O servidor aceita os dois formatos de entrada; a resposta Delphi usa `0x361` com `TitleIndex: DWORD` e `TitleLevel: DWORD`.
-- `0x329`: entrada `TRemoveBuffPacket`; payload `DWORD Buff`. O servidor remove o buff ativo do proprio personagem por `SkillData.Id` ou `SkillData.Index`, persiste a remocao em `active_buffs`, envia `0x16E` e full refresh. Se o buff ja expirou ou nao existe, e tratado como no-op.
+- `0x329`: entrada `TRemoveBuffPacket`; payload `DWORD Buff`. O servidor aceita o ID exato, o `SkillData.Index` ou outro ID de nivel que resolva para o mesmo index, persiste a remocao em `active_buffs`, envia `0x16E` e full refresh. Se o buff ja expirou ou nao existe, e tratado como no-op.
+- `0x322`: party invite. Entrada do cliente contem alvo `DWORD` e nome fixo de 16 bytes; apos `PartyService.Invite` valido, o servidor entrega `0x322` ao convidado com o id/nome do convidador.
+- `0x323`: resposta de convite. `AcceptType == 0` rejeita; qualquer outro valor aceita. Aceite cria/entra na party e publica `0x326` para todos os membros.
+- `0x324`: kick de party pelo lider. Em sucesso, membros restantes recebem `0x326` e o removido recebe `0x326` vazio.
+- `0x325`: sair/destruir party. Lider com payload proprio/zero desfaz; membro comum sai. Removidos recebem `0x326` vazio.
+- `0x326`: entrada de alocacao EXP/item (`DWORD`, `DWORD`) e saida de refresh fixo Rafinha com 6 slots de membro. O handler publica refresh uma vez por party afetada, evitando duplicar envio quando varios membros aparecem no resultado da mutacao.
+- `0x338`: pedido de coordenada de membro da party; responde `0x11D` com member `DWORD`, X `DWORD`, Y `DWORD`.
+- `0x34B`: transferir lideranca da party; em sucesso publica `0x326` para os membros.
+- Disconnect de sessao: `SessionManager.RemoveSession` chama `PartyHandler.HandleDisconnect` antes de `UnbindCharacter`, para que o membro removido ainda esteja indexado e os membros restantes recebam refresh.
 - `0x31F`: animacao do personagem (`Anim`, `Loop`) enviada em ataques/skills.
 - `0x349`: spawn/representacao de personagem e NPC de servico. Para NPC, `NpcService` usa `IsService = 1` e sender igual ao client id do NPC.
 - `0x101`: remocao de mob/NPC visivel. Para NPC, `NpcService` usa sender fixo `0x7535` e payload com o client id removido, conforme a rotina Delphi.
@@ -192,3 +212,10 @@ O `PacketTool` tambem normaliza automaticamente dumps/copias hex do Wireshark ao
 Em 2026-07-02, o `PacketTool` passou a descriptografar streams Aika concatenados no input. Isso cobre capturas coladas como uma linha unica ou payloads TCP grandes, onde o input contem varios pacotes Aika em sequencia. A ferramenta procura cada segmento criptografado por checksum do `EncDec` e so aceita o segmento quando o header descriptografado declara o mesmo tamanho; depois mostra cada pacote separadamente no resultado.
 
 O output de descriptografia mostra somente cabecalho e `data`, sem repetir o pacote completo. Ao clicar em um pacote descriptografado, o `SelectedPacketLabel` exibe o indice, offset, tamanho e opcode; o botao `Send Data to Hex Info` copia apenas o payload `data` desse pacote para o `HexInputRichTextBox`.
+## Party e templaria - 2026-07-14
+
+- `PacketDispatcher` roteia party: `0x322` invite, `0x323` resposta, `0x324` kick, `0x325` leave/disband, `0x326` refresh/alocacao, `0x338` posicao, `0x34B` transferencia de lider.
+- Server `0x326` envia ate 6 membros. Membro removido recebe refresh vazio.
+- `0x11D` responde coordenadas de membro da party.
+- Dano com Uniao Divina pode atualizar HP de dois personagens: alvo original e templaria linked. O fluxo atual envia refresh HP/MP para o alvo redirecionado quando ha sessao ativa.
+- `EncDec` nao foi alterado nesta etapa.

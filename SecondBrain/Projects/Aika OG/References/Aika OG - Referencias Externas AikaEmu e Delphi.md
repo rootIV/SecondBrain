@@ -3,7 +3,7 @@ tags:
   - project/aika-og
   - references
   - graphify
-updated: 2026-07-04
+updated: 2026-07-08
 ---
 
 # Aika OG - Referencias Externas AikaEmu e Delphi
@@ -11,6 +11,7 @@ updated: 2026-07-04
 ## Graphify
 
 - Delphi `Aika TheMu New`: `C:\Users\Vitor\Documents\Projects\aika\Aika TheMu New\graphify-out\graph.json`
+- Delphi Aika Rafinha Server: `C:\Users\Vitor\Documents\Projects\aika\Aika Rafinha Server\graphify-out\graph.json`
 - AikaEmu: `C:\Users\Vitor\Documents\Projects\aika\AikaEmu-master\graphify-out\graph.json`
 - GM Tool Delphi: `C:\Users\Vitor\Documents\Projects\aika\Tools\GM Tool\graphify-out\graph.json`
 - MasterEditor Delphi: `C:\Users\Vitor\Documents\Projects\aika\Tools\MasterEditor\graphify-out\graph.json`

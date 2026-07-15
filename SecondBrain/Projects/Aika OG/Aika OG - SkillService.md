@@ -52,9 +52,10 @@ Sistema inicial de skills no `GameServer`: skills iniciais do personagem, uso Pv
   - ocupa o primeiro slot livre ate o limite de `60`;
   - calcula `EndsAt` a partir de `SkillData.Duration`;
   - remove expirados via tick de `CharacterRegenerationService`/`MobAiService`.
-- Packets Delphi:
-  - `0x16E`: refresh completo, com `40` ids de buffs e `40` unix end times (`TSendBuffsPacket`);
-  - `0x16F`: add/update individual com `Buff: DWORD`, `EndTime: DWORD`, `Unk: DWORD` (`TUpdateBuffPacket`, size `24`).
+- Packets Delphi/Rafinha:
+  - `0x16E`: refresh completo, com `60` ids de buffs e `60` tempos restantes em segundos (`TSendBuffsPacket`, size `372`);
+  - `0x16F`: add/update individual com `Buff: DWORD`, `RemainingSeconds: DWORD`, `Unk: DWORD` (`TUpdateBuffPacket`, size `24`).
+  - Importante: o cliente interpreta o campo de tempo como duracao restante, nao como timestamp Unix absoluto. Enviar `EndsAt`/Unix time faz o cliente exibir duracoes absurdas, como centenas de meses.
 - Ao aplicar buff via skill ou comando `.effect`, o servidor deve enviar animacao `0x31F` usando `SkillData.Anim/SelfAnimation`, depois `0x16F` e refresh de status.
 - `CharacterStatusService` inclui os efeitos de buffs ativos no mesmo coletor usado por item, set e titulo. O acumulador agora aceita valores assinados, entao debuffs com valores negativos reduzem atributos/status e o resultado final e clampado.
 - Quando um buff expira no personagem, o servidor envia `0x16E` e refresh completo (`0x103`, `0x109`, `0x10A`, `0x108`).
@@ -107,12 +108,16 @@ Em 2026-07-06, o GameServer passou a carregar `Data\SkillBehaviors.json` no boot
 - Skills revisadas (`reviewed=true`) usam o comportamento auditado do catalogo.
 - Skills nao revisadas (`reviewed=false`) com `BehaviorKind` concreto usam `MergeWithTemplate` e fallback inferido de `SkillData.bin`, restaurando ataques, ataque+debuff, buffs, debuffs e curas genericas para as classes jogaveis.
 - Skills com `BehaviorKind=Unknown` continuam bloqueadas no uso e retornam falha antes de consumir MP ou cooldown.
+- Entradas nao revisadas do catalogo geradas como `Attack/Enemy/Target`, mas cujo `SkillData` infere `Buff`/`Heal` por duracao+efeitos e sem dano, passam a usar o comportamento inferido do template. Isso corrige casos como `skillId=1121..1136` / `Guardiao` e `skillId=1233` / `Protecao`, que antes exigiam alvo inimigo, falhavam silenciosamente antes do `0x320`/`0x31F` e nao criavam `ActiveBuff`/`0x16F`.
+- `skillId=1233` / `Protecao` foi revisada explicitamente como `Buff/Self/Caster`. O `TargetId` recebido no `0x320` nao e resolvido como mob; o cast consome MP/cooldown, usa a animacao do `SkillData` e publica o buff temporizado no `0x16F`.
+- `SkillHandler.UseSkill` agora loga rejeicoes de uso com `charId`, classe, skill, alvo, MP e motivo, para evitar falhas silenciosas quando o catalogo ou validacoes bloquearem uma skill. `SkillService.UseSkill` tambem retorna motivos explicitos para contexto invalido, template ausente/invalido, level, MP, cooldown, alvo ausente/fora do range, rejeicao de buff e falha de combate.
 - A primeira regra revisada e `skillId=140` / `Quebrar Armadura`: `AttackDebuff`, alvo inimigo, aplica dano e debuff somente no mob alvo; a animacao propria fica no emissor e `TargetAnimation` fica no pacote de dano/efeito do destinatario.
 - `SkillService.UseSkill` agora executa via `SkillBehaviorDefinition` quando o catalogo esta configurado; sem catalogo configurado, testes e comandos internos continuam usando inferencia a partir de `SkillData`.
 - Buffs/debuffs ativos passam a ter persistencia em `active_buffs` por `ActiveBuffRepository`, com `owner_type`, `owner_id`, `skill_id`, `skill_index`, `unique_type`, `is_debuff`, `started_at`, `ends_at`, `source_id`, `effect_ids` e `effect_values`.
 - `CharacterRepository` reidrata buffs ativos nao expirados ao carregar personagem. O lifecycle de buff remove expirados no tick de regen e envia `0x16E` + refresh completo ao personagem afetado.
 - Debuffs de mob continuam runtime no `MobEntity.ActiveBuffs`; o schema suporta `owner_type='mob'` para persistencia quando for necessario reidratar mobs.
 - `0x329` (`TRemoveBuffPacket`) agora remove buff ativo do proprio personagem por `SkillData.Id` ou `SkillData.Index`, persiste a remocao em `active_buffs`, envia `0x16E` e full refresh. Pacotes de remocao para buffs ja expirados sao no-op.
+- A remocao manual tambem resolve o ID recebido para o `SkillData.Index` da familia. Assim, por exemplo, `buff=1245` remove uma Protecao ativa de outro nivel com `SkillIndex=36`; nao existe lista de buffs irremoviveis nesta etapa.
 - `skillId=1070` / `Proficiência com Escudo` foi revisada no catalogo: `AttackDebuff`, alvo inimigo, dano `360`, efeito `73`, duracao `4s`, aplicado ao alvo.
 
 ## Offsets principais de SkillData
@@ -162,6 +167,8 @@ O C# segue esse desenho, mas no primeiro recorte limita o alvo a mob comum carre
 
 Em 2026-07-05, a factory de `0x320` foi corrigida para copiar os bytes antes de devolver o `PacketStream` ao pool. Isso e importante para efeitos visuais de skill/buff, porque devolver o objeto antes de `GetBytes()` podia corromper/zerar o payload visual. O comando `.effect <SkillDataId>` tambem passou a enviar `0x320` visual para si/visiveis antes do `0x31F` e do `0x16F`, aproximando o fluxo de uma skill real aplicada no proprio personagem.
 
+Em 2026-07-08, o `SkillService.UseSkill` passou a suportar resultado multialvo para PvE inspirado no Rafinha: `SkillBehaviorDefinition` ganhou `TargetMode`, `AreaCenter` e `MaxTargets`; skills com `SuccessRate = 1` e `Range > 0` sao inferidas como area; o servico consome MP/cooldown uma vez por cast, resolve mobs ativos dentro da area, aplica dano/buff por alvo e retorna listas de `CombatResults`/`AppliedBuffs`. O `SkillHandler` envia `0x102` e `0x16F` para todos os resultados afetados, preservando compatibilidade com `CombatResult`/`AppliedBuff` para o primeiro alvo.
+
 ## Passivas v1
 
 `CharacterPassiveSkillEffectService` porta um primeiro subconjunto de `TPlayer.SearchSkillsPassive`, somente para efeitos diretos que ja existem no status atual. Exemplos implementados:
@@ -174,3 +181,14 @@ Em 2026-07-05, a factory de `0x320` foi corrigida para copiar os bytes antes de 
 - `Index 152`: velocidade.
 
 Efeitos especiais sem infraestrutura atual continuam no-op documentado ate as mecanicas correspondentes existirem.
+
+## Templaria, party e hooks de combate - 2026-07-14
+
+- `TemplarSkillRuleService` centraliza regras por familia/Index mantendo o ID exato do cast como nivel (`ef 1281`, `1282`, etc.).
+- Pesca `1025` e montaria `1041` sao rejeitadas antes de MP/cooldown com erro explicito; ficam fora do pacote atual.
+- Core implementado: Defesa Concentrada `993`, Stigma `1009`, Proficiência com Escudo `1057`, Remediar `1073`, Nemesis `1089`, Incitar Multidao `1105`, Guardiao `1121`, Sangue Sagrado `1137`, Travar Alvo `1153`, Defesa Concentrada de cargas `1169`, Punicao `1185`, Revelacao `1201`, Uniao Divina `1217`, Protecao `1233`.
+- Avancadas implementadas: Emissao Divina `1249` AoE 4m/silence, Escudo Refletor `1265`, El Tycia `1281`, El Aster `1297`, El Thymos `1313`, El Aegis `1329`, Atracao Divina `1345`.
+- `CombatModifierService` aplica multiplicador racial contra Demon/Undead, reducoes, Protecao com cargas, reflexao sem recursao, life steal, splash basico do El Thymos e redirect da Uniao Divina.
+- `PartyDamageService` gerencia link da Uniao Divina, redirect de 30% com cap acumulado 2680, bonus de resistencia e remocao de link invalido.
+- `ControlEffectService` separa stun, silence e root. Silence bloqueia skills, nao ataque basico; root bloqueia movimento, nao ataque se ja estiver em alcance.
+- `BuffLifecycleService` processa tick do El Aegis a cada 2s e limpa links invalidos de Uniao Divina.

@@ -3,7 +3,7 @@ tags:
   - project/aika-og
   - service
   - npc
-updated: 2026-07-06
+updated: 2026-07-08
 ---
 
 # Aika OG - NPC Spawn
@@ -50,7 +50,7 @@ Fonte analisada: `C:\Users\Vitor\Documents\Projects\aika\Aika TheMu New`.
   - `0x313 TBuyNPCItemPacket`: `Index`, `Slot`, `Quantidade` como `DWORD`.
   - `0x314 TSellNPCItemPacket`: `Index`, `Slot` como `DWORD`.
 - `NpcShopService` valida que a loja esta aberta, que o NPC possui capacidade de loja, e opera apenas sobre inventario normal nesta etapa. Compra v1 usa gold, cria/agrupa no primeiro slot desbloqueado e rejeita moeda especial sem derrubar a sessao. Venda v1 soma gold conforme regra Delphi: stackable usa quantidade/refine; equipamento usa `SellPrince div 5` proporcional a `MIN/MAX` de durabilidade, rejeitando item temporario, `TypeItem = 7`, sem preco ou nao negociavel.
-- Apos compra/venda, o handler persiste itens e runtime state, envia `0xF0E` para slots alterados e reenvia um refresh de inventario/gold baseado no `0x925`, porque os refreshes curtos `0x103/0x109/0x10A/0x108` nao carregam gold.
+- Apos compra/venda, o handler persiste itens e runtime state, envia `0xF0E` para slots alterados e reenvia refresh de inventario/gold. Desde 2026-07-08, o fluxo tambem envia o refresh Rafinha correto `0x312 TRefreshMoneyPacket` (`Unk`, `InventoryGold`, `ChestGold`) com `ChestGold = 0` nesta etapa; o `0x925` continua no refresh por compatibilidade visual ja validada.
 - Giovanni/benção usa opcoes `35` e `65` como fluxo inicial de buff runtime: fecha dialogo, aplica flag `HasGiovanniBlessing`, recalcula status e dispara full refresh visual. Persistencia completa de buffs fica fora desta etapa.
 
 ## Cuidados

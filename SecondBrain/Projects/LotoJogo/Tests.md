@@ -39,6 +39,10 @@ Observacoes:
 - Em 2026-05-13, `dotnet test .\lotojogo-tests\lotojogo-tests.csproj` passou com 60 testes, mantendo apenas o warning conhecido de EF Core Relational.
 - Em 2026-05-13, `dotnet build .\lotojogo-back-end\lotojogo-api.sln` passou com o mesmo warning conhecido.
 - Em 2026-06-05, `dotnet build .\lotojogo-back-end\lotojogo-api.sln` e `dotnet test .\lotojogo-tests\lotojogo-tests.csproj` passaram com 88 testes, mantendo apenas o warning conhecido de EF Core Relational.
+- Em 2026-07-09, `LoteServiceTests` passou a cobrir persistencia de titulo em aposta manual e retorno do titulo no detalhe e na lixeira.
+- Em 2026-07-09, `StrategyRequestValidatorTests` passou a cobrir `manual.config.title` valido e rejeicao de titulo acima de 80 caracteres.
+- Em 2026-07-09, `dotnet build .\lotojogo-back-end\lotojogo-api.sln` passou com 1 warning e `dotnet test .\lotojogo-tests\lotojogo-tests.csproj` passou com 93 testes e 11 warnings conhecidos/filtrados pelo RTK.
+- Em 2026-07-09, `dotnet build .\lotojogo-back-end\lotojogo-api.sln` e `dotnet test ..\lotojogo-tests\lotojogo-tests.csproj` passaram apos corrigir a descoberta da migration `AddBetTitle`; a API aplicou `Bets.title` e a replica ficou sincronizada.
 
 ## Frontend
 
@@ -85,6 +89,7 @@ Estado observado:
 - Em 2026-05-12, `npm run build` passou apos ajustes de metadados em `BetRow`, timezone `America/Sao_Paulo` e scrollbar transitoria acionada apenas por rolagem real.
 - Em 2026-05-18, `npm run build` passou apos adicionar modo compacto/expandido em `strategy-section` e persistencia local de rascunho da aba Home.
 - Em 2026-06-05, `npm run build` e `npm run lint` passaram apos trocar os inputs numericos dos cards da Home para texto numerico sanitizado.
+- Em 2026-07-09, `npm run build` e `npm run lint` passaram apos adicionar titulos editaveis em apostas manuais e o fluxo contextual de exportacao CSV/PDF; o build manteve apenas o aviso de chunk grande do Vite.
 
 ## Politica
 

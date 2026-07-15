@@ -57,6 +57,7 @@ src/
 - Em 2026-07-06, a criacao de estrategias da aba Home passou a usar `strategy-creation-panel` com IDs estaveis para `Categoria:`, `Algoritmo:` e defaults, evitando IDs React `_r_*` no DOM.
 - Em 2026-07-06, `strategies-config-div` mostra a categoria atual no cabecalho e oferece busca com blur por estrategias e apostas manuais em rascunho agrupadas por categoria; abrir um item troca para a categoria correta e posiciona a paginacao.
 - Em 2026-07-06, `strategy-pagination` permanece visivel sempre que existe ao menos uma pagina de estrategia/manual, inclusive exibindo `Estratégia 1 de 1` com setas desabilitadas quando ha pagina unica.
+- Em 2026-07-08, a paginacao de estrategias passou para o header do painel, em formato compacto `n/total` ao lado da busca por categoria.
 - Depois de uma geracao bem-sucedida, a aba Home limpa automaticamente as estrategias configuradas e apostas manuais usadas na geracao.
 - A aba Home persiste rascunho local em `localStorage` para sobreviver a refresh acidental, incluindo estrategias configuradas, defaults, estrategia selecionada e apostas manuais por categoria.
 - O rascunho local da Home e limpo/substituido quando o usuario limpa estrategias, aplica template ou conclui uma geracao com sucesso.
@@ -140,6 +141,7 @@ src/
 - Clicar em qualquer area da aposta, incluindo `bet-row__meta`, seleciona a aposta para o `MainCard`; apenas os botoes de acao bloqueiam a propagacao do clique.
 - Os containers rolaveis da lista de lotes e do detalhe do lote tambem usam `useScrollActivity` para mostrar scrollbar apenas durante rolagem real.
 - `lote-list-item__cost` exibe o custo total do lote em layout compacto, calculado a partir das apostas e precos reais por categoria/quantidade de dezenas.
+- Em 2026-07-08, a aba Gerenciar passou a exportar CSV de apostas ativas pelo header da lista, por lote individual e pelo detalhe do lote, usando geracao de arquivo no frontend sem novo endpoint backend.
 - Em telas ate 1200px, `ManageTab`, lista de lotes, detalhe do lote e lixeira removem alturas fixas internas e deixam o documento principal rolar. Isso evita que `LoteDetail`, apostas e acoes da lixeira fiquem cortados no layout mobile/tablet.
 - Em 320px, `strategy-section__bets` e `BetRow` reduzem padding, gaps, botoes e chips numericos para evitar overflow horizontal e impedir que a aba Gerenciar force os demais elementos a crescerem.
 
@@ -169,6 +171,14 @@ src/
 - O input `Adicione manualmente:` aceita dezenas separadas por virgula para preencher a selecao atual; duplicados e limites exibem aviso pequeno sem salvar aposta automaticamente.
 - Em 2026-07-02, o input `Adicione manualmente:` passou a manter o texto editavel enquanto sincroniza a linha `Atual` em tempo real; apagar um numero do texto ou usar o `x` do chip remove somente o numero do rascunho atual, sem alterar apostas manuais ja adicionadas.
 - Em 2026-07-02, `Super Sete` ganhou layout visual proprio no `MainCard`: 7 colunas com digitos `0` a `9`, usando codificacao interna por coluna para permitir repetir digitos em colunas diferentes sem alterar contratos do backend.
+- Em 2026-07-08, `card-button__manual-bets` do `MainCard` passou a exibir uma aposta manual por vez, com navegacao, busca local, edicao inline e exclusao sem alterar o contrato de geracao.
+- Em 2026-07-09, apostas manuais passaram a usar `ManualBetDraft = { title, numbers }` no frontend, com leitura retrocompativel dos rascunhos antigos salvos como `number[]` em `localStorage`.
+- Em 2026-07-09, `MainCard` passou a exibir o titulo da aposta manual no cabecalho do carrossel, permitir editar titulo e numeros juntos, e separar o modo de rascunho de nova aposta da visualizacao de apostas ja adicionadas.
+- Em 2026-07-09, os exports de `LoteList`, item individual e `LoteDetail` passaram a abrir uma tela contextual de exportacao com escopo visivel e acoes `Exportar PDF`, `Exportar CSV` e `Exportar CSV e PDF`.
+- Em 2026-07-09, o frontend adicionou geracao de PDF por `Blob` sem dependencia externa, reaproveitando os dados do CSV e incluindo titulo da aposta quando existir.
+- Em 2026-07-09, `dashboard-card__selection-panel` voltou a ficar logo abaixo de `dashboard-card__header`; `card-actions` ficou dedicado apenas a exibicao/edicao da aposta manual.
+- Em 2026-07-09, `right-config__tabs` passou a nomear a aba inicial como `Gerar`, adicionou a aba `Configurar` com icone de sliders e trocou `Gerenciar` para icone de ferramenta.
+- Em 2026-07-09, a aba `Gerar` passou a manter `strategy-creation-panel` e `strategies-scroll__toolbar` no topo, seguidos do `quick-generation-review`; cada linha do review abre a estrategia correspondente em `Configurar`. A aba `Configurar` mantem a toolbar no topo e o conteudo no `strategies-scroll`, com a acao `Gerar Apostas`.
 - Em 2026-07-03, a visualizacao do `Super Sete` passou a renderizar 7 colunas reais (`dashboard-card__super-sete-board`) com label `Col. 1` a `Col. 7`, em vez de depender de `grid-auto-flow`; os breakpoints compactam gaps, labels e celulas mantendo as 7 colunas de mobile S ate 4K.
 - Em 2026-07-03, o tabuleiro do `Super Sete` passou a limitar largura e altura das celulas por viewport para impedir que as 7 colunas gerem quadrados gigantes em 1920x917, laptop L e 4K; a compactacao geral de dezenas fica restrita de tablet ate laptop para preservar a Lotomania em 4K.
 - Em 2026-07-03, a correcao do `Super Sete` removeu os overrides antigos com `grid-auto-flow`/linhas `1fr` que reapareciam em tablet, laptop L, 1920x917 e 4K; o JSX agora usa `dashboard-card__super-sete-board` com colunas independentes e celulas de altura fixa compacta.

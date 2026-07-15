@@ -3,7 +3,7 @@ tags:
   - project/aika-og
   - service
   - mob
-updated: 2026-07-06
+updated: 2026-07-11
 ---
 
 # Aika OG - MobService
@@ -50,6 +50,7 @@ Arquivo: `GameServer/Application/Services/MobService.cs`
 - O anuncio de drop deve ser `Adquiriu "Nome do Item"`, sem prefixo de quantidade, mesmo quando o item vem com stack/refine maior que 1. O nome e normalizado para ASCII porque o client nao lida bem com acentos/caracteres especiais.
 - XP por kill tem minimo de 1 quando o mob nao tem `ExpReward` explicito ou quando a diferenca de level e grande (`<= -8` ou `>= 6`).
 - Patrulha usa os campos Delphi ja carregados de `MonsterListCSV.csv`: `InitialMoveWait`, `DestinationMoveWait`, posicao inicial/destino e `MoveSpeed`.
+- `InitialMoveWait` e `DestinationMoveWait` se aplicam somente a patrulha idle. Em `Returning`, o mob anda continuamente a cada tick de 500 ms, ignora threat de proximidade e usa `MoveSpeed` configurado no packet de retorno.
 - Mobs melee usam speed 70 apenas durante perseguicao/agro; patrulha continua com a velocidade configurada. Se a corrida coloca o mob dentro do range de ataque no mesmo tick, ele ataca imediatamente respeitando cooldown.
 - Mobs melee hostis entram em threat por proximidade no raio Delphi `<= 8`, desde que nao sejam service, mutant, static/boss-like ou nome contendo `Max`. Esse lure nao propaga chain aggro para mobs fora do proprio raio.
 - Cooldown basico de ataque melee esta mais curto que ranged/magic (`~1.2s`) para manter pancadas constantes apos aproximar; ranged/magic preserva o cooldown padrao atual.
@@ -60,6 +61,9 @@ Arquivo: `GameServer/Application/Services/MobService.cs`
 - O loop de AI busca candidatos por `WorldGrid` ao redor do mob e preserva alvos ja presentes na threat table via indice de sessao.
 - Quando mob move, reseta ou respawna, `WorldEntitySpatialIndex.UpsertMob` precisa ser chamado para manter visibilidade correta.
 - Movimento/dano/spawn de mob reutilizam pacote `byte[]` quando o payload e identico para multiplos destinatarios.
+- `MobThreatService` agora suporta alvo forcado com expiracao para Incitar Multidao/Travar Alvo. O alvo forcado vence threat numerica enquanto valido e cai para threat normal ao expirar, morrer ou sair da party/sessao relevante.
+- Root em mob impede movimento e retorno, mas nao impede ataque se o alvo ja esta dentro do range. Stun continua bloqueando movimento e ataque.
+- A Atracao Divina reposiciona mob valido para 1.5m do caster, chama `WorldEntitySpatialIndex.UpsertMob` e aplica root por 3s. Service/static/mutant/dead nao devem ser puxados.
 
 ## Pontos de cuidado
 

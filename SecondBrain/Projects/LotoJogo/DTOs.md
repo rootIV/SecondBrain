@@ -20,9 +20,9 @@ Arquivos principais:
 
 ## Lote DTOs
 
-- `BetDto`: `Id`, `Numbers`, `CreatedAt`.
+- `BetDto`: `Id`, `Numbers`, `CreatedAt`, `IsMarked`, `Title`.
 - `StrategyDto`: `Id`, `Category`, `MaxNumbers`, `Type`, `Config`, `PoolSize`, `Bets`.
-- `TrashedBetDto`: aposta na lixeira.
+- `TrashedBetDto`: aposta na lixeira, incluindo `Title`.
 - `LoteSummaryDto`: resumo para listagem.
 - `LoteDetailDto`: detalhe completo do lote.
 - `GenerateResponseDto`: resposta de geracao.
@@ -61,6 +61,7 @@ Novas configs de estrategia no frontend:
 - O contrato usa `JsonElement Config`, alinhado com `StrategyConfig` de [[GenerateService]].
 - `Config` continua flexivel, mas agora passa por limite de tamanho, profundidade e allowlist de `type` antes de persistir ou gerar.
 - Templates podem salvar estrategias `manual`; a UI restaura essas apostas para `manualBetsByCategory` ao aplicar o template.
+- Em 2026-07-09, estrategias `manual` podem enviar `config.title` para nomear a aposta manual persistida em `Bets.title` (`varchar(80) not null default ''`).
 - Em records usados como requests MVC, DataAnnotations ficam nos parametros do construtor primario com `[param: ...]`; usar `[property: ...]` em `Strategies` causa erro de metadata ignorada no ASP.NET Core.
 
 ## Limites de entrada

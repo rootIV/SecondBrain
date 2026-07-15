@@ -82,9 +82,12 @@ Relacionado: [[LotoJogo - MOC]], [[Architecture]], [[Auth]], [[Repositories]], [
 
 - `StrategyRequestValidator` centraliza limites para requests de geracao e templates.
 - `StrategyRequestValidator` valida `StrategyConfig.Config` por allowlist de propriedades/tipos por estrategia e combinacao. Campos numericos precisam chegar como JSON number inteiro; `numbersList` precisa ser array de inteiros; strings arbitrarias em `config` sao rejeitadas antes de gerar ou persistir.
+- Em 2026-07-09, a estrategia `manual` passou a aceitar `config.title` opcional com trim e limite de 80 caracteres; outros tipos de estrategia continuam rejeitando strings/propriedades fora da allowlist.
 - `SecurityLimits` define teto de body, config JSON, profundidade JSON, quantidade de estrategias, apostas por estrategia e universo numerico. O teto global de universo numerico e 100 para cobrir modalidades como [[Quina]], [[Timemania]] e [[Lotomania]].
 - `GenerateController`, `StrategyTemplatesController` e endpoints publicos de [[Auth]] aplicam `RequestSizeLimit`.
 - `GenerateService` rejeita tipos de estrategia desconhecidos em vez de cair para `random`.
+- Em 2026-07-09, `LoteService.GenerateAsync` passou a persistir `Bet.Title` para apostas geradas por estrategia manual e retornar o titulo em detalhes e lixeira.
+- Em 2026-07-09, a migration `AddBetTitle` recebeu os metadados `[DbContext]` e `[Migration]` para ser descoberta pelo EF Core no startup; sem isso `/Lotes` falhava com `Unknown column 'b.title'` porque a coluna nao era criada no master/slave.
 
 ## Observacao arquitetural
 

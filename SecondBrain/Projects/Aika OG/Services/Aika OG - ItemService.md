@@ -77,6 +77,7 @@ Em 2026-07-03 entrou o primeiro corte do sistema de inventario/equipamento basea
 - Equip -> inventario ocupado troca somente se o item do inventario puder equipar no slot de origem.
 - `ItemRepository.NormalizeActiveItemsForSave` normaliza itens por `(slotType, slot)` antes do insert, deixando a ultima entrada vencer caso exista duplicata em memoria. Isso blinda o save contra `Duplicate entry ... for key itens.PRIMARY` quando um estado antigo ou uma troca deixa slot duplicado em memoria.
 - `ItemHandler.PersistAndRefresh` captura falha de banco ao salvar itens e loga o erro sem derrubar o servidor.
+- O refresh `0xF0E` serializa exatamente o `TItem` Delphi de 20 bytes: `Index/APP` como `WORD`, `Identific` como `LongInt`, seis bytes de efeitos, `MIN/MAX`, `Refi` e `Time`. Com isso, o client le `Refi` no offset correto e mostra a quantidade no canto do slot apos agrupar.
 
 ## Anti-spam e durabilidade
 
@@ -89,14 +90,15 @@ Em 2026-07-03 entrou o primeiro corte do sistema de inventario/equipamento basea
 
 ## Comandos de desenvolvimento
 
-- `.item <id> [quantidade]` cria a quantidade pedida como itens individuais nos primeiros slots de inventario desbloqueados e vazios.
+- `.i <id> [quantidade]` cria itens individuais para templates nao agrupaveis.
+- Para templates agrupaveis (`CanAgroup=true`), a quantidade pedida e gravada em `Refine`, reaproveitando stacks existentes e criando stacks novos de ate `1000` por slot. Exemplo: `1000` pedacos de Facion ocupam um slot com `Refine=1000`.
 - O comando usa apenas slots de conteudo `0..119`; slots `120..125` continuam reservados para marcadores de bolsa.
 - Se nao houver espaco para todos os itens pedidos, nao altera o inventario e envia a mensagem `Inventario cheio`.
-- O comando valida `ItemTemplateService.Templates`, preenche `ItemId/App`, `Refine=1`, durabilidade, persiste no banco e envia refresh `0xF0E` com `notice=false` para cada slot criado.
+- O comando valida `ItemTemplateService.Templates`, preenche `ItemId/App`, `Refine` como quantidade/refino, durabilidade, persiste no banco e envia refresh `0xF0E` com `notice=false` para cada slot criado ou stack atualizado.
 
 ## Pontos de cuidado
 
-- `WriteItemOnPacket` ainda escreve efeitos como zeros; quando implementar efeitos reais, preservar ordem `effectIndex/effectValue`.
+- `WriteItemOnPacket` preserva os tres indices e valores de efeitos na ordem do `TItem` Delphi.
 - `MinimalValue` e `MaxValue` sao convertidos para byte no pacote.
 - `ItemList.bin` e lido a partir do offset `0`; o arquivo tem sobra no final, nao cabecalho inicial de 4 bytes.
 - O layout do packet `0xF0E` foi coberto por teste de caracterizacao antes da refatoracao.
