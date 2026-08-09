@@ -1,13 +1,13 @@
-# LoteService Frontend
+﻿# LoteService Frontend
 
 Relacionado: [[Frontend]], [[LoteService]], [[ApiService Frontend]], [[DTOs]].
 
 Arquivos:
 
-- `lotojogo-front-end/src/services/lote.service.ts`
-- `lotojogo-front-end/src/hooks/useLotes.ts`
-- `lotojogo-front-end/src/hooks/useLoteDetail.ts`
-- `lotojogo-front-end/src/hooks/useLoteMutations.ts`
+- `lotojogo/src/services/lote.service.ts`
+- `lotojogo/src/hooks/useLotes.ts`
+- `lotojogo/src/hooks/useLoteDetail.ts`
+- `lotojogo/src/hooks/useLoteMutations.ts`
 
 ## Responsabilidade
 

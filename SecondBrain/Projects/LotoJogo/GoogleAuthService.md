@@ -1,8 +1,8 @@
-# GoogleAuthService
+﻿# GoogleAuthService
 
 Relacionado: [[Auth]], [[AuthService]], [[TokenProtectorService]], [[Backend]].
 
-Arquivo: `lotojogo-back-end/Services/GoogleAuthService.cs`.
+Arquivo: `lotojogo-api/Services/GoogleAuthService.cs`.
 
 ## Responsabilidade
 

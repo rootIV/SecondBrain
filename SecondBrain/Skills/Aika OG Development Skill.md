@@ -1,4 +1,4 @@
----
+﻿---
 tags:
   - skill
   - project/aika-og
@@ -11,7 +11,7 @@ Relacionado: [[Aika OG - MOC]], [[Aika OG - Arquitetura Atual]]
 
 Skill local criada em:
 
-`C:\Users\Vitor\.codex\skills\skills\aika-og-development`
+`C:\Users\root4\.codex\skills\skills\aika-og-development`
 
 ## Quando usar
 

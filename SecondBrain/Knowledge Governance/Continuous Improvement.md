@@ -1,4 +1,4 @@
----
+﻿---
 tags:
   - second-brain
   - continuous-improvement
@@ -34,7 +34,7 @@ Area dedicada ao aprendizado do proprio sistema de conhecimento e dos processos 
 
 ## Gargalos de desenvolvimento
 
-- Ausencia de Git no vault `C:\Users\Vitor\Documents\SecondBrain` limita rastreabilidade por diff/commit.
+- Ausencia de Git no vault `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain` limita rastreabilidade por diff/commit.
 - Duplicidade de configuracao `.obsidian` entre raiz e subpasta exige cuidado; a raiz foi definida como operacional, mas a configuracao secundaria ainda existe.
 - Workspaces Obsidian podem carregar referencias antigas que nao representam mais conteudo atual; isso deve entrar em verificacao periodica.
 

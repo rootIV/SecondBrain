@@ -1,9 +1,9 @@
----
+﻿---
 tags:
   - second-brain
   - maintenance
   - log
-updated: 2026-06-05
+updated: 2026-07-25
 ---
 
 # Maintenance Log
@@ -31,7 +31,7 @@ Criar uma camada pequena de governanca reduz ambiguidade para futuras interacoes
 - Renomeados arquivos com extensao dupla `.md.md` para `.md`, atualizando referencias de workspace relacionadas.
 - Criado [[Continuous Improvement]] como area dedicada para erros recorrentes, correcoes recorrentes, gargalos, debitos, decisoes revertidas e boas praticas descobertas.
 - Criado [[Knowledge Decisions]] para decisoes transversais de governanca do vault.
-- Definida a raiz operacional do vault como `C:\Users\Vitor\Documents\SecondBrain`, mantendo `SecondBrain/` como namespace principal de conteudo.
+- Definida a raiz operacional do vault como `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain`, mantendo `SecondBrain/` como namespace principal de conteudo.
 - Removidas referencias obsoletas a `DesignSkills`/`design-skills` do workspace raiz apos confirmar que os diretorios nao existem.
 - Criado [[Health Check]] e `Tools/Test-SecondBrainHealth.ps1` para automatizar verificacoes basicas do vault.
 - Renomeada a nota generica `Skills/Docker.md` para [[Docker Skill]] para evitar ambiguidade com a nota de projeto [[Docker]].
@@ -50,3 +50,46 @@ Futuras mudancas passam a ter local padrao para registrar decisoes, aprendizados
 
 - Planejar uma migracao fisica somente se houver valor claro em eliminar o namespace `SecondBrain/`.
 - Criar uma verificacao automatizada simples para detectar notas vazias, wikilinks quebrados e arquivos recentes inexistentes.
+
+## 2026-07-25 - Configuracao global do Codex
+
+### Problema
+
+O Codex ainda dependia de contexto por tarefa para lembrar o uso do Second Brain, Graphify, RTK e selecao correta de skills.
+
+### Solucao aplicada
+
+- Atualizado `C:\Users\root4\.codex\AGENTS.md` para carregar `C:\Users\root4\.codex\RTK.md`.
+- Adicionado include global para `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain\AGENTS.md`.
+- Registradas preferencias permanentes para pt-BR, estilo pragmatico, uso do Second Brain, consulta a Graphify quando houver `graphify-out`, uso de RTK e selecao proporcional de skills.
+- Confirmado que `C:\Users\root4\.codex\config.toml` ja mantem `personality = "pragmatic"`.
+
+### Verificacao
+
+- Caminhos globais do RTK, Second Brain, MOC principal e Knowledge Operating Model existem.
+- `Tools\Test-SecondBrainHealth.ps1` passou com `Passed = True`.
+- O health check apontou apenas duplicidade de notas `Architecture`, registrada em [[Knowledge Debt]].
+
+## 2026-07-25 - Instalacao operacional do Graphify
+
+### Problema
+
+O Codex estava configurado para consultar Graphify quando houvesse grafo, mas o CLI `graphify` ainda nao estava instalado nem resolvendo no PATH.
+
+### Solucao aplicada
+
+- Confirmado que o Python passou a responder via python-manager: `Python 3.14.6`.
+- Instalado `uv 0.11.32` via WinGet.
+- Instalado Graphify pelo pacote oficial `graphifyy==0.9.26`, que fornece os comandos `graphify` e `graphify-mcp`.
+- Registrada a skill Graphify para Codex em `C:\Users\root4\.codex\skills\graphify\SKILL.md`.
+- Criados shims em `C:\Users\root4\.codex\bin` para `graphify`, `graphify-mcp` e `uv`, mantendo as ferramentas resolviveis no mesmo PATH operacional do RTK.
+- Atualizado `C:\Users\root4\.codex\AGENTS.md` para definir o uso conjunto correto: Graphify para perguntas de grafo/arquitetura e RTK para busca, git, testes, builds e leituras auxiliares.
+
+### Verificacao
+
+- `graphify --version` retornou `graphify 0.9.26`.
+- `uv --version` retornou `uv 0.11.32`.
+- `rtk --version` retornou `rtk 0.43.0`.
+- `graphify god-nodes --top 3` funcionou contra o grafo existente do LotoJogo.
+- `rtk rg --files .` funcionou no mesmo projeto.
+- `multi_agent = true` ja estava ativo em `C:\Users\root4\.codex\config.toml`.

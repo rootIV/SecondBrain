@@ -1,4 +1,18 @@
-# Known Issues
+﻿# Known Issues
+
+## DNS apontando para EC2 antigo - registrado em 2026-07-16
+
+- Sintoma: o painel Hostinger mostrou `A @` apontando para `18.231.198.237`, mas o EC2 novo esta em `18.228.48.86`.
+- Impacto: Caddy nao consegue emitir TLS correto para `lotojogo.com.br` enquanto o dominio apontar para o host antigo.
+- Mitigacao: preferir associar Elastic IP ao EC2 novo e apontar `A @` para ele; se nao usar Elastic IP, apontar `A @` para `18.228.48.86`. Manter `CNAME www -> lotojogo.com.br`.
+- Relacionado: [[Docker]].
+
+## Backend sem grafo Graphify local - registrado em 2026-07-16
+
+- Estado: o frontend `lotojogo` possui `graphify-out\graph.json`; o backend `lotojogo-api` ainda nao possui `graphify-out\graph.json`.
+- Impacto: consultas Graphify devem ser usadas primeiro para tarefas frontend; para backend, usar Obsidian, `rtk`, `rg` e leitura escopada ate um grafo backend ser gerado.
+- Ferramentas: `rtk 0.43.0`, `graphifyy 0.9.17` e `llmlingua 0.2.2` foram instalados/verificados no ambiente Codex em 2026-07-16.
+- Relacionado: [[Agent Context Rules]], [[Decision Log]], [[Architecture]].
 
 ## HTTPS em `www.lotojogo.com.br` - corrigido em 2026-06-24
 
@@ -11,12 +25,12 @@
 ## Graphify indisponivel no PATH do Codex - resolvido em 2026-06-24
 
 - Causa: `graphify-out/graph.json` existia, mas o pacote `graphifyy` nao estava instalado no Python bundled usado pelo Codex.
-- Correcao: `graphifyy` instalado em `C:\Users\Vitor\.cache\codex-runtimes\codex-primary-runtime\dependencies\python`; CLI validado com `graphify explain "Hero"`.
-- Integracao: skill instalada em `C:\Users\Vitor\.codex\skills\graphify` e MCP configurado no `.codex/config.toml` do projeto.
+- Correcao: `graphifyy` instalado em `C:\Users\root4\.cache\codex-runtimes\codex-primary-runtime\dependencies\python`; CLI validado com `graphify explain "Hero"`.
+- Integracao: skill instalada em `C:\Users\root4\.codex\skills\graphify` e MCP configurado no `.codex/config.toml` do projeto.
 - Observacao: novas sessoes do Codex devem ser abertas para carregar o MCP adicionado.
 - Recorrencia em 2026-06-25: o runtime Python bundled ainda estava no PATH, mas `graphifyy` nao estava mais instalado e `graphify.exe`/`graphify-mcp.exe` nao existiam em `Scripts`.
-- Correcao em 2026-06-25: reinstalado `graphifyy==0.8.49` no runtime bundled, validado `rtk proxy graphify explain "Hero" --graph .\graphify-out\graph.json`, confirmado `Get-Command graphify` apontando para `...\python\Scripts\graphify.exe` e sincronizadas as skills `graphify` em `C:\Users\Vitor\.codex`, `C:\Users\Vitor\.agents` e `C:\Users\Vitor\.claude`.
-- Persistencia: o PATH de usuario ja contem `C:\Users\Vitor\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Scripts`; se uma nova sessao falhar de novo, verificar primeiro se o pacote foi removido do runtime com `python.exe -m pip show graphifyy`.
+- Correcao em 2026-06-25: reinstalado `graphifyy==0.8.49` no runtime bundled, validado `rtk proxy graphify explain "Hero" --graph .\graphify-out\graph.json`, confirmado `Get-Command graphify` apontando para `...\python\Scripts\graphify.exe` e sincronizadas as skills `graphify` em `C:\Users\root4\.codex`, `C:\Users\root4\.agents` e `C:\Users\root4\.claude`.
+- Persistencia: o PATH de usuario ja contem `C:\Users\root4\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Scripts`; se uma nova sessao falhar de novo, verificar primeiro se o pacote foi removido do runtime com `python.exe -m pip show graphifyy`.
 - Relacionado: [[Agent Context Rules]], [[Decision Log]].
 
 ## SonarQube token sem permissao de criar projeto
@@ -88,13 +102,14 @@ Relacionado: [[LotoJogo - MOC]], [[Tests]], [[Frontend]], [[LotteryStrategies]],
 - `most_frequent` e `less_frequent` existem no frontend, mas nao tem algoritmo especifico no backend.
 - `+Milionaria` ainda nao modela selecao de trevos no dashboard; custo atual do resumo assume 2 trevos. Needs verification quando trevos forem implementados.
 - `Super Sete` tem regra oficial por colunas, mas o gerador atual ainda trata o universo como numeros sequenciais. Needs verification antes de considerar a modalidade fiel ao volante oficial.
-- As planilhas de [[Time Mania]] ate concurso 2360 nao contem o concurso 1623; o seed importado tem 2359 registros para `time_mania`. Needs verification contra outra fonte antes de preencher manualmente.
+- Resolvido em 2026-08-08: as planilhas de [[Time Mania]] ate concurso 2360 nao continham o concurso 1623; o seed foi preenchido com o concurso 1623 como `timemania` canonico, numeros `[3, 22, 27, 42, 53, 55, 61]`, data `2021-04-08` e time `FLUMINENSE/RJ`.
+- `super_sete` e `mais_milionaria` ainda tem cobertura historica incompleta no seed local. Em 2026-08-08, a Caixa bloqueou tentativas de download/importacao em massa com `429`/`403`; retomar por endpoint oficial de download ou importacao rate-limited depois do desbloqueio.
 
 ## Infra
 
 - Docker hot reload em Windows foi anotado como instavel em notas antigas; revalidar antes de tratar como bug atual.
-- O vault ativo do LotoJogo e `C:\Users\Vitor\Documents\SecondBrain\SecondBrain\Projects\LotoJogo`; o duplicado antigo em `C:\Users\Vitor\Documents\SecondBrain\Projects\LotoJogo` foi removido em 2026-05-16.
-- A pasta pai `C:\Users\Vitor\Documents\Projects\lotojogo` nao e o repositorio Git principal; os repositorios Git encontrados ficam em `lotojogo-front-end` e `lotojogo-back-end`. Rodar comandos Git a partir do subprojeto correto.
+- O vault ativo do LotoJogo e `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain\SecondBrain\Projects\LotoJogo`; o duplicado antigo em `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain\Projects\LotoJogo` foi removido em 2026-05-16.
+- A pasta pai `C:\Users\root4\OneDrive\Documents\Projetcts\Lotojogo` nao e o repositorio Git principal; os repositorios Git encontrados ficam em `lotojogo` e `lotojogo-api`. Rodar comandos Git a partir do subprojeto correto.
 - Em 2026-05-20, foram encontrados segredos reais em arquivos locais antes da limpeza: senha MySQL, JWT key e Google OAuth Client Secret. Mitigacao: rotacionar credenciais no MySQL/ambiente de producao e recriar o Google Client Secret no Google Cloud Console. Needs verification depois da rotacao.
 - O deploy seguro no EC2 precisa de dominio e TLS. Com `ASPNETCORE_ENVIRONMENT=Production`, cookies `Secure` exigem HTTPS; `http://IP` nao deve ser usado para fluxo autenticado. Needs verification apos configurar HTTPS.
 - Segredos em `.env` nao devem ser usados em producao. O compose de producao usa Docker secrets por arquivo; antes de producao real, avaliar migracao para AWS Secrets Manager, SSM Parameter Store ou mecanismo equivalente. Needs verification.

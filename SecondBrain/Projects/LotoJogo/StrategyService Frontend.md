@@ -1,17 +1,17 @@
-# StrategyService Frontend
+﻿# StrategyService Frontend
 
 Relacionado: [[Frontend]], [[LotteryStrategies]], [[GenerateService]], [[DTOs]].
 
 Arquivos:
 
-- `lotojogo-front-end/src/services/strategy.service.ts`
-- `lotojogo-front-end/src/strategies/Schema.ts`
-- `lotojogo-front-end/src/strategies/StrategyRegistry.ts`
-- `lotojogo-front-end/src/types/Strategy.ts`
-- `lotojogo-front-end/src/features/strategies/strategyFactory.ts`
-- `lotojogo-front-end/src/features/strategies/strategyTemplates.ts`
-- `lotojogo-front-end/src/features/strategies/strategyValidation.ts`
-- `lotojogo-front-end/src/services/strategyTemplate.service.ts`
+- `lotojogo/src/services/strategy.service.ts`
+- `lotojogo/src/strategies/Schema.ts`
+- `lotojogo/src/strategies/StrategyRegistry.ts`
+- `lotojogo/src/types/Strategy.ts`
+- `lotojogo/src/features/strategies/strategyFactory.ts`
+- `lotojogo/src/features/strategies/strategyTemplates.ts`
+- `lotojogo/src/features/strategies/strategyValidation.ts`
+- `lotojogo/src/services/strategyTemplate.service.ts`
 
 ## Responsabilidade
 

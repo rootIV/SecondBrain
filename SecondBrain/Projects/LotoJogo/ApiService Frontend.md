@@ -1,8 +1,8 @@
-# ApiService Frontend
+﻿# ApiService Frontend
 
 Relacionado: [[Frontend]], [[Auth]], [[AuthService Frontend]], [[LoteService Frontend]].
 
-Arquivo: `lotojogo-front-end/src/services/api.service.ts`.
+Arquivo: `lotojogo/src/services/api.service.ts`.
 
 ## Responsabilidade
 

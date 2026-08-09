@@ -1,9 +1,9 @@
----
+﻿---
 tags:
   - second-brain
   - governance
   - operating-model
-updated: 2026-06-05
+updated: 2026-07-16
 ---
 
 # Knowledge Operating Model
@@ -21,7 +21,7 @@ Manter o Second Brain como memoria persistente de arquitetura, produto, qualidad
 
 ## Raiz operacional do vault
 
-- A raiz operacional atual e `C:\Users\Vitor\Documents\SecondBrain`.
+- A raiz operacional atual e `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain`.
 - O conteudo principal fica no namespace `SecondBrain/` dentro da raiz.
 - A configuracao `.obsidian` da raiz deve ser tratada como configuracao ativa enquanto seus paths apontarem para `SecondBrain/...`.
 - A subpasta `SecondBrain/.obsidian` e configuracao secundaria/herdada; nao deve orientar reorganizacoes sem verificacao manual.
@@ -35,6 +35,14 @@ Manter o Second Brain como memoria persistente de arquitetura, produto, qualidad
 5. Verificar com comandos proporcionais ao risco.
 6. Atualizar notas quando houver decisao, caveat, contrato, padrao ou aprendizado duravel.
 7. Registrar inconsistencias em [[Knowledge Debt]] quando nao forem resolvidas no mesmo ciclo.
+
+## Codex e skills
+
+- O Codex deve tratar este vault como memoria operacional antes de leituras amplas de codigo.
+- Skills locais instaladas em `C:\Users\root4\.codex\skills` complementam, mas nao substituem, as notas do vault.
+- Para reduzir tokens, priorizar nesta ordem: MOC especifico, Graphify quando houver grafo, `rtk`, `rg --files`/`rg`, leitura direta de arquivos.
+- Usar Superpowers automaticamente quando a tarefa envolver desenho de solucao, debugging, TDD, plano, execucao, review ou verificacao.
+- Usar LLMLingua apenas como apoio experimental de compressao; escopo correto e ferramentas de busca continuam sendo a primeira otimizacao.
 
 ## Health check
 

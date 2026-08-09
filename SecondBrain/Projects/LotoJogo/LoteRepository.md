@@ -1,8 +1,8 @@
-# LoteRepository
+﻿# LoteRepository
 
 Relacionado: [[Repositories]], [[LoteService]], [[Backend]].
 
-Arquivo: `lotojogo-back-end/Infrastructure/Repositories/LoteRepository.cs`.
+Arquivo: `lotojogo-api/Infrastructure/Repositories/LoteRepository.cs`.
 
 ## Responsabilidade
 

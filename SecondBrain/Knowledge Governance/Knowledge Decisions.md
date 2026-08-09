@@ -1,4 +1,4 @@
----
+﻿---
 tags:
   - second-brain
   - decision-log
@@ -40,7 +40,7 @@ updated: 2026-06-05
 
 ## 2026-06-05 - Definir raiz operacional sem mover conteudo
 
-- Decisao: tratar `C:\Users\Vitor\Documents\SecondBrain` como raiz operacional do vault e `SecondBrain/` como namespace principal de conteudo.
+- Decisao: tratar `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain` como raiz operacional do vault e `SecondBrain/` como namespace principal de conteudo.
 - Motivo: o workspace ativo da raiz referencia arquivos em `SecondBrain/...`, e mover conteudo agora criaria risco desnecessario.
 - Alternativas descartadas:
   - Mover todo conteudo da subpasta para a raiz: descartado por risco alto de quebrar links e workspace.

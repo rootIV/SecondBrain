@@ -1,8 +1,8 @@
-# LoteService
+﻿# LoteService
 
 Relacionado: [[Backend]], [[GenerateService]], [[LoteRepository]], [[DTOs]], [[LotteryStrategies]], [[Tests]].
 
-Arquivo: `lotojogo-back-end/Services/LoteService.cs`.
+Arquivo: `lotojogo-api/Services/LoteService.cs`.
 
 ## Responsabilidade
 

@@ -58,8 +58,14 @@ Relacionado: [[LotoJogo - MOC]], [[Architecture]], [[Auth]], [[Repositories]], [
 - A persistencia usa `LotteryDraws` com numeros em JSON e `LotteryDrawExtras` para metadados variaveis.
 - `dupla_sena` usa `draw_order` para guardar o primeiro e o segundo sorteio do mesmo concurso.
 - O seed `Data/Seed/lottery-draws.seed.json` e importado de forma idempotente no startup apos migrations.
+- `LotteryGameCatalog` normaliza aliases legados do seed (`loto_mania`, `time_mania`, `dia_sorte`) e `LotteryDrawRepository` consulta aliases para que estatisticas historicas enxerguem bancos antigos e novos.
+- `GET /Admin/lottery-draws/coverage` audita cobertura por modalidade e mostra lacunas de concurso/draw_order para orientar importacao oficial sem rodar rede no startup.
+- `POST /Admin/lottery-draws/import-caixa` suporta todas as modalidades do catalogo via `OfficialCaixa:ContestUrlTemplate`, reutiliza o parser dos providers e limita a 500 concursos por chamada.
 - `StrategyOptimizerService` consulta sorteios recentes para sugerir configuracoes de estrategias por faixas estatisticas.
 - `BetInsightService` consulta sorteios recentes para calcular frequencia media das dezenas de uma aposta, comparacao com o ultimo sorteio e selo de combinacao vencedora.
+- `POST /Lotes/historical/import` importa apostas antigas do usuario para os lotes existentes; se o concurso historico existir em `LotteryDraws` e ainda nao existir em `LotteryContests`, o backend cria um concurso `Drawn` verificado/provisorio conforme o sorteio.
+- A importacao historica aceita texto TXT simples, CSV semicolon com cabecalho `numeros;valor;premio;titulo` ou linhas estruturadas, respeitando quotas por plano (`PlanQuotaPolicy`) e limites de tamanho/linhas em `SecurityLimits`.
+- `Bets.stake_amount` e `Bets.prize_amount` sao opcionais e permitem gerenciar gasto/retorno real da epoca; `totalCost`, `totalPrize` e `netResult` sao retornados nos DTOs de lote.
 
 ## Middleware relevante
 

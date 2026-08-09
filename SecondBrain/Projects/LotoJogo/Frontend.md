@@ -39,6 +39,7 @@ src/
 - `useLoteMutations`: mutacoes de aposta/lote e invalidacao de queries.
 - `useDashboardState`: orquestra selecao de categoria/dezenas, apostas manuais, lote exibido e selecao de aposta gerenciada.
 - `useStrategyBuilder`: orquestra estrategias do `HomeTab`, templates locais, validacao e chamada a `generateBets`.
+- `useStrategyBuilder.addHistoricalStrategySuggestion` aplica sugestoes pessoais de historico como `StrategyInstance` no escopo ativo, com origem `user-historical-bets`.
 - `useSavedStrategies`: query de estrategias salvas em `/api/strategies`, opcionalmente filtrada por categoria.
 - `useCreateSavedStrategy`, `useUpdateSavedStrategy`, `useDeleteSavedStrategy`: mutations para CRUD de estrategias salvas.
 
@@ -63,6 +64,7 @@ src/
 - O rascunho local da Home e limpo/substituido quando o usuario limpa estrategias, aplica template ou conclui uma geracao com sucesso.
 - A tela de templates da aba Home exibe criacao de template em bloco destacado e cada `strategy-template-card` resume as estrategias salvas em lista com tipo, dezenas, apostas e quantidade de numeros configurados quando aplicavel.
 - O HomeTab valida configuracoes antes de chamar `generateBets`, bloqueando dezenas/apostas zeradas, somas impossiveis e combinacoes inconsistentes.
+- O HomeTab consome sugestoes historicas pendentes vindas da aba Gerenciar: troca para a categoria da sugestao quando necessario, adiciona a estrategia e navega para a aba `Configurar`.
 - O botao `Gerar apostas` abre `GenerationReviewPanel` dentro de `strategies-scroll`; a chamada real a `/Generate` acontece somente no botao `Confirmar`.
 - Cada geracao bem-sucedida na aba Home incrementa um contador de rodadas geradas no texto da aba `Gerenciar`, exibido como `Gerenciar (n)`.
 - Apos gerar apostas com sucesso, o HomeTab mostra um overlay com blur, icone de sucesso, mensagem de confirmacao e acao para abrir diretamente o lote gerado.
@@ -131,6 +133,7 @@ src/
 
 ## ManageTab
 
+- `HistoricalBetImportPanel` permite importar apostas antigas por TXT/CSV, baixar modelo CSV `numeros;valor;premio;titulo`, baixar/ler modelo XLSX no navegador ou cadastrar uma aposta manual estruturada com dezenas, titulo, valor apostado e premio; XLSX e normalizado client-side para `bets[]`, sem upload binario para a API, e sugestoes pessoais podem ser aplicadas diretamente no builder.
 - `BetRow` exibe uma mini secao de metadados logo abaixo do titulo da aposta: quantidade de dezenas, data, hora, soma e status.
 - `BetRow` tambem exibe paridade, identificacoes no hover dos metadados e insights historicos em um bloco compacto colapsado chamado `Analise`.
 - Cada `strategy-section` do `LoteDetail` inicia em modo compacto, com toggle por seta para expandir/compactar.
@@ -176,9 +179,15 @@ src/
 - Em 2026-07-09, `MainCard` passou a exibir o titulo da aposta manual no cabecalho do carrossel, permitir editar titulo e numeros juntos, e separar o modo de rascunho de nova aposta da visualizacao de apostas ja adicionadas.
 - Em 2026-07-09, os exports de `LoteList`, item individual e `LoteDetail` passaram a abrir uma tela contextual de exportacao com escopo visivel e acoes `Exportar PDF`, `Exportar CSV` e `Exportar CSV e PDF`.
 - Em 2026-07-09, o frontend adicionou geracao de PDF por `Blob` sem dependencia externa, reaproveitando os dados do CSV e incluindo titulo da aposta quando existir.
+- Em 2026-08-02, a aba Gerenciar ganhou filtros de lote por categoria, concurso e data via `useLotes(filters)`. A opcao `Sem concurso` e aplicada localmente sobre `contestNumber == null`, porque o contrato frontend/backend atual aceita apenas `contestNumber?: number` para consulta.
+- Em 2026-08-02, `BetRow` passou a ter toggle unico de marcar/desmarcar e toggle de bloquear/desbloquear; apostas bloqueadas continuam selecionaveis para copiar numeros ao card principal, mas nao marcam/desmarcam, regeneram ou apagam no frontend.
 - Em 2026-07-09, `dashboard-card__selection-panel` voltou a ficar logo abaixo de `dashboard-card__header`; `card-actions` ficou dedicado apenas a exibicao/edicao da aposta manual.
 - Em 2026-07-09, `right-config__tabs` passou a nomear a aba inicial como `Gerar`, adicionou a aba `Configurar` com icone de sliders e trocou `Gerenciar` para icone de ferramenta.
 - Em 2026-07-09, a aba `Gerar` passou a manter `strategy-creation-panel` e `strategies-scroll__toolbar` no topo, seguidos do `quick-generation-review`; cada linha do review abre a estrategia correspondente em `Configurar`. A aba `Configurar` mantem a toolbar no topo e o conteudo no `strategies-scroll`, com a acao `Gerar Apostas`.
+- Em 2026-07-27, `quick-generation-review` passou a paginar 4 itens por vez com paginação compacta no rodape, e cada row exibe badges preparados para `isLocked` e `fillStatus` futuros em `StrategyInstance`.
+- Em 2026-07-27, a paginação do `quick-generation-review` passou a calcular dinamicamente quantas rows cabem em desktop (`min-width: 1201px`) usando `ResizeObserver`, centralizando as rows quando sobra espaco e paginando o excedente sem depender de scroll interno.
+- Em 2026-07-27, a area de configuracao foi extraida para `ConfigTab`; as classes `strategies-config-*` foram substituidas por `config-tab*`, e `strategies-scroll__toolbar` deixou de existir na aba `Configurar`.
+- Em 2026-07-27, `quick-generation-review` ganhou acoes de header para abrir templates salvos e confirmar limpeza da categoria atual; o status de preenchimento agora e calculado por `validateStrategies([strategy], maxNumbers)`, com apenas `Preenchido`/`Nao preenchido`. O bloqueio de estrategia e estado local do rascunho em `StrategyInstance.isLocked`, impedindo edicao, otimizacao e duplicacao ate desbloquear.
 - Em 2026-07-03, a visualizacao do `Super Sete` passou a renderizar 7 colunas reais (`dashboard-card__super-sete-board`) com label `Col. 1` a `Col. 7`, em vez de depender de `grid-auto-flow`; os breakpoints compactam gaps, labels e celulas mantendo as 7 colunas de mobile S ate 4K.
 - Em 2026-07-03, o tabuleiro do `Super Sete` passou a limitar largura e altura das celulas por viewport para impedir que as 7 colunas gerem quadrados gigantes em 1920x917, laptop L e 4K; a compactacao geral de dezenas fica restrita de tablet ate laptop para preservar a Lotomania em 4K.
 - Em 2026-07-03, a correcao do `Super Sete` removeu os overrides antigos com `grid-auto-flow`/linhas `1fr` que reapareciam em tablet, laptop L, 1920x917 e 4K; o JSX agora usa `dashboard-card__super-sete-board` com colunas independentes e celulas de altura fixa compacta.
@@ -213,6 +222,9 @@ src/
 - Em telas ate 1200px, a ordem responsiva e `RightProfileStatusBar`, `RightConfigSideBar`, `DashboardMain` e `GeneratedBetsCard`; isso cobre as faixas de 1026px e 1102px que antes ainda recebiam layout desktop e podiam cortar cards.
 - O `GeneratedBetsCard` fica fora do `DashboardMain` no fluxo mobile/tablet para preservar a ordem visual esperada depois do painel principal.
 - O botao `category-menu__close` da [[Frontend|LeftSideBar]] usa centralizacao via pseudo-elemento para corrigir o alinhamento visual do `x`.
+- Em 2026-08-01, `Estrategias Salvas` do quick review passou a abrir a tela de templates dentro da aba Gerar. As acoes do `strategy-card` e do header do quick review usam medicao responsiva para expandir/empilhar botoes e evitar reticencias entre mobile S e 4K.
+- Em 2026-08-01, rascunhos de geracao e apostas manuais passaram a ser escopados por categoria + concurso quando ha concurso selecionado, com fallback por dia local para rascunhos sem concurso. O review rapido da aba Gerar agrega categorias do escopo ativo e pode navegar para detalhes por categoria.
+- Em 2026-08-01, apostas da aba Gerenciar podem ser bloqueadas/desbloqueadas. Aposta bloqueada ainda pode ser selecionada para copiar numeros ao `MainCard`, mas nao pode ser marcada/desmarcada, regenerada ou excluida; o `MainCard` recebe `activeManagedBet.isLocked` e desabilita a acao de marcar/desmarcar quando o estado bloqueado estiver ativo.
 
 ## Auth no frontend
 
@@ -243,6 +255,7 @@ Padrao atual observado:
   - `display: "standalone"` → app aparece sem barra do navegador.
   - `theme_color` → cor da barra superior em Android.
   - Permite instalacao em Android/iOS via "Adicionar a home screen".
+- Em 2026-08-01, `index.html` passou a declarar `lang="pt-BR"`, `translate="no"`, `class="notranslate"` e `<meta name="google" content="notranslate" />` para evitar que Chrome/Google Translate altere textos da UI em celulares, especialmente no dashboard autenticado.
 
 ## Pontos de atencao
 

@@ -1,9 +1,9 @@
----
+﻿---
 tags:
   - second-brain
   - debt
   - knowledge-quality
-updated: 2026-06-05
+updated: 2026-07-25
 ---
 
 # Knowledge Debt
@@ -12,7 +12,14 @@ Registro de lacunas, duplicacoes e inconsistencias da base de conhecimento.
 
 ## Aberto
 
-Nenhum debito aberto registrado neste momento.
+### Nomes duplicados `Architecture`
+
+- Detectado em 2026-07-25 pelo health check do vault.
+- Impacto: wikilinks para `[[Architecture]]` podem ficar ambiguos no Obsidian.
+- Arquivos:
+  - `SecondBrain/Projects/LotoJogo/Architecture.md`
+  - `SecondBrain/Projects/MotionInBet/Architecture.md`
+- Mitigacao pendente: desambiguar nomes ou links quando houver contexto suficiente para decidir o padrao por projeto.
 
 ## Resolvido
 
@@ -24,7 +31,7 @@ Nenhum debito aberto registrado neste momento.
 ### Vault raiz vs subpasta `SecondBrain`
 
 - Resolvido operacionalmente em 2026-06-05.
-- Justificativa: [[Knowledge Decisions]] definiu a raiz `C:\Users\Vitor\Documents\SecondBrain` como vault operacional e `SecondBrain/` como namespace principal de conteudo, sem migracao fisica neste momento.
+- Justificativa: [[Knowledge Decisions]] definiu a raiz `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain` como vault operacional e `SecondBrain/` como namespace principal de conteudo, sem migracao fisica neste momento.
 
 ### Arquivos com extensao dupla `.md.md`
 

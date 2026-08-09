@@ -1,4 +1,4 @@
-# Tests
+﻿# Tests
 
 ## Cache e replica
 
@@ -24,9 +24,10 @@ dotnet test lotojogo-tests\lotojogo-tests.csproj
 
 Observacoes:
 
-- A solution `lotojogo-back-end/lotojogo-api.sln` referencia a API e `../lotojogo-tests/lotojogo-tests.csproj`.
+- A solution `lotojogo-api/lotojogo-api.sln` referencia a API e `../lotojogo-tests/lotojogo-tests.csproj`.
+- Em 2026-07-16, `lotojogo-tests/lotojogo-tests.csproj` foi ajustado para referenciar `..\lotojogo-api\lotojogo-api.csproj`, nome atual do backend neste workspace.
 - O Docker dev nao monta a solution no container da API; por isso os testes podem ficar na solution sem quebrar o `dotnet watch`.
-- Tambem e possivel rodar `dotnet test lotojogo-api.sln` a partir de `lotojogo-back-end`.
+- Tambem e possivel rodar `dotnet test lotojogo-api.sln` a partir de `lotojogo-api`.
 - Pode aparecer warning de conflito em `Microsoft.EntityFrameworkCore.Relational`.
 - `StrategyTemplateServiceTests` cobre criar, listar por usuario, atualizar, excluir e bloquear acesso cruzado entre usuarios para templates de estrategia.
 - `StrategyTemplateServiceTests.Request_records_keep_validation_metadata_on_primary_constructor_parameters` cobre a regressao de DataAnnotations em records MVC, garantindo que `CreateStrategyTemplateRequest.Strategies` tenha validacao no parametro do construtor.
@@ -37,12 +38,14 @@ Observacoes:
 - Em 2026-06-05, `StrategyRequestValidatorTests` passou a cobrir rejeicao de payloads string/HTML/SQL-like em campos numericos, `numbersList` com itens nao numericos, propriedades extras em `config`, `mode` invalido e config invalida em combinacoes.
 - `GenerateServiceTests.GenerateOne_sum_fixed_can_return_different_valid_combinations` cobre a regressao em que regenerar `sum` retornava sempre a mesma combinacao.
 - Em 2026-05-13, `dotnet test .\lotojogo-tests\lotojogo-tests.csproj` passou com 60 testes, mantendo apenas o warning conhecido de EF Core Relational.
-- Em 2026-05-13, `dotnet build .\lotojogo-back-end\lotojogo-api.sln` passou com o mesmo warning conhecido.
-- Em 2026-06-05, `dotnet build .\lotojogo-back-end\lotojogo-api.sln` e `dotnet test .\lotojogo-tests\lotojogo-tests.csproj` passaram com 88 testes, mantendo apenas o warning conhecido de EF Core Relational.
+- Em 2026-05-13, `dotnet build .\lotojogo-api\lotojogo-api.sln` passou com o mesmo warning conhecido.
+- Em 2026-06-05, `dotnet build .\lotojogo-api\lotojogo-api.sln` e `dotnet test .\lotojogo-tests\lotojogo-tests.csproj` passaram com 88 testes, mantendo apenas o warning conhecido de EF Core Relational.
 - Em 2026-07-09, `LoteServiceTests` passou a cobrir persistencia de titulo em aposta manual e retorno do titulo no detalhe e na lixeira.
 - Em 2026-07-09, `StrategyRequestValidatorTests` passou a cobrir `manual.config.title` valido e rejeicao de titulo acima de 80 caracteres.
-- Em 2026-07-09, `dotnet build .\lotojogo-back-end\lotojogo-api.sln` passou com 1 warning e `dotnet test .\lotojogo-tests\lotojogo-tests.csproj` passou com 93 testes e 11 warnings conhecidos/filtrados pelo RTK.
-- Em 2026-07-09, `dotnet build .\lotojogo-back-end\lotojogo-api.sln` e `dotnet test ..\lotojogo-tests\lotojogo-tests.csproj` passaram apos corrigir a descoberta da migration `AddBetTitle`; a API aplicou `Bets.title` e a replica ficou sincronizada.
+- Em 2026-07-09, `dotnet build .\lotojogo-api\lotojogo-api.sln` passou com 1 warning e `dotnet test .\lotojogo-tests\lotojogo-tests.csproj` passou com 93 testes e 11 warnings conhecidos/filtrados pelo RTK.
+- Em 2026-07-09, `dotnet build .\lotojogo-api\lotojogo-api.sln` e `dotnet test ..\lotojogo-tests\lotojogo-tests.csproj` passaram apos corrigir a descoberta da migration `AddBetTitle`; a API aplicou `Bets.title` e a replica ficou sincronizada.
+- Em 2026-07-16, `dotnet build lotojogo-api/lotojogo-api.sln` passou com 1 warning conhecido de EF Core Relational.
+- Em 2026-07-16, `dotnet test lotojogo-tests/lotojogo-tests.csproj` passou com 93 testes, 0 falhas e o mesmo warning conhecido.
 
 ## Frontend
 
@@ -68,7 +71,7 @@ Na primeira analise, o token precisa ser do `admin` ou de um usuario com permiss
 Projetos no SonarQube:
 
 - `lotojogo-backend`: usa SonarScanner for .NET, `dotnet build`, `dotnet test` e cobertura OpenCover gerada por `coverlet.collector`.
-- `lotojogo-frontend`: usa SonarScanner CLI em Docker com `sonar-project.properties`, limitado a `lotojogo-front-end/src`.
+- `lotojogo-frontend`: usa SonarScanner CLI em Docker com `sonar-project.properties`, limitado a `lotojogo/src`.
 
 O scanner .NET fica fixado em `.config/dotnet-tools.json`; rodar `dotnet tool restore` quando necessario. O servidor local fica documentado em [[Docker]].
 
@@ -83,13 +86,14 @@ Estado observado:
 - Em 2026-05-14, `dotnet test lotojogo-tests\lotojogo-tests.csproj` passou com 60 testes apos os endpoints estatisticos.
 - Em 2026-05-14, `npm run build` e `npm run lint` passaram apos redesenhar `GeneratedBetsCard`, adicionar custo total do lote atual e corrigir duplicacao visual dos numeros.
 - Em 2026-05-14, `dotnet test lotojogo-tests\lotojogo-tests.csproj` passou com 68 testes apos corrigir templates, resumo de otimizacao e centralizacao do custo do lote, mantendo apenas o warning conhecido de EF Core Relational.
-- Em 2026-05-14, `dotnet build lotojogo-back-end\lotojogo-api.sln`, `npm run build` e `npm run lint` passaram apos os mesmos ajustes.
+- Em 2026-05-14, `dotnet build lotojogo-api\lotojogo-api.sln`, `npm run build` e `npm run lint` passaram apos os mesmos ajustes.
 - Smoke visual em `http://127.0.0.1:5173` abriu a home; o console mostrou CORS em `/Auth/me` para `http://localhost:5176`, provavelmente configuracao do backend local.
 - Fluxo validado em browser com mock: regenerar uma aposta na aba Gerenciar atualiza somente a combinacao correspondente em `GeneratedBetsCard`.
 - Em 2026-05-12, `npm run build` passou apos ajustes de metadados em `BetRow`, timezone `America/Sao_Paulo` e scrollbar transitoria acionada apenas por rolagem real.
 - Em 2026-05-18, `npm run build` passou apos adicionar modo compacto/expandido em `strategy-section` e persistencia local de rascunho da aba Home.
 - Em 2026-06-05, `npm run build` e `npm run lint` passaram apos trocar os inputs numericos dos cards da Home para texto numerico sanitizado.
 - Em 2026-07-09, `npm run build` e `npm run lint` passaram apos adicionar titulos editaveis em apostas manuais e o fluxo contextual de exportacao CSV/PDF; o build manteve apenas o aviso de chunk grande do Vite.
+- Em 2026-07-16, `npm --prefix lotojogo run build` passou apos `npm install`; o build manteve apenas o aviso conhecido de chunk grande do Vite.
 
 ## Politica
 

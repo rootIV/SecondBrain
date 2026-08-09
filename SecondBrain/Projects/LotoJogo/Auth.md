@@ -1,4 +1,4 @@
-# Auth
+﻿# Auth
 
 Relacionado: [[LotoJogo - MOC]], [[Backend]], [[Frontend]], [[AuthService]], [[GoogleAuthService]], [[TokenProtectorService]], [[UserRepository]], [[ApiService Frontend]], [[AuthService Frontend]].
 
@@ -8,7 +8,7 @@ O sistema de auth usa JWT em cookies HTTP-only, refresh tokens tambem em cookie,
 
 ## Backend
 
-Controller principal: `lotojogo-back-end/Controllers/AuthController.cs`.
+Controller principal: `lotojogo-api/Controllers/AuthController.cs`.
 
 Endpoints:
 

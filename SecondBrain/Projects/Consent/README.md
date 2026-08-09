@@ -1,4 +1,4 @@
-# Consent / Handshake
+﻿# Consent / Handshake
 
 Este diretório organiza o contexto de produto, arquitetura e execução do MVP do Handshake.
 
@@ -18,7 +18,7 @@ Handshake é uma plataforma de confiança digital para acordos mútuos, consenti
 ## Fontes locais
 
 - Repositório: `C:\Users\Vitor\Documents\Projects\consent`
-- Texto base: `C:\Users\Vitor\.codex\attachments\501aff4a-fbb0-43e8-b8d1-69e56121ba06\pasted-text.txt`
+- Texto base: `C:\Users\root4\.codex\attachments\501aff4a-fbb0-43e8-b8d1-69e56121ba06\pasted-text.txt`
 - Docs do projeto:
   - `docs/architecture.md`
   - `docs/data-model.md`

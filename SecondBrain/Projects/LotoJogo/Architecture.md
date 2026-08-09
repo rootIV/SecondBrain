@@ -1,4 +1,4 @@
-# Architecture
+﻿# Architecture
 
 Relacionado: [[LotoJogo - MOC]], [[Backend]], [[Frontend]], [[Repositories]], [[DTOs]], [[Auth]], [[LotteryStrategies]], [[Agent Context Rules]].
 
@@ -12,7 +12,7 @@ Relacionado: [[LotoJogo - MOC]], [[Backend]], [[Frontend]], [[Repositories]], [[
 
 ```text
 lotojogo/
-  lotojogo-front-end/
+  lotojogo/
     src/components/
     src/contexts/
     src/domain/
@@ -25,7 +25,7 @@ lotojogo/
     src/styles/
     src/types/
 
-  lotojogo-back-end/
+  lotojogo-api/
     Application/Interfaces/
     Controllers/
     Data/
@@ -36,8 +36,8 @@ lotojogo/
 
 ## Controle de versao
 
-- A pasta pai `C:\Users\Vitor\Documents\Projects\lotojogo` organiza os projetos, mas nao e o repositorio Git principal.
-- Existem repositorios Git separados dentro de `lotojogo-front-end` e `lotojogo-back-end`.
+- A pasta pai `C:\Users\root4\OneDrive\Documents\Projetcts\Lotojogo` organiza os projetos, mas nao e o repositorio Git principal.
+- Existem repositorios Git separados dentro de `lotojogo` e `lotojogo-api`.
 - Ao rodar `git status`, `git diff`, commits ou branches, usar o diretorio do projeto especifico.
 - Para reduzir contexto, seguir [[Agent Context Rules]] antes de pesquisar/editar arquivos.
 
@@ -97,5 +97,5 @@ Regras puras extraidas:
 
 - As notas antigas pediam SCSS modules, mas o codigo atual usa SCSS global.
 - Alguns componentes de landing ainda usam inline styles.
-- Diagramas em `lotojogo-front-end/diagrams` podem estar desatualizados em relacao ao backend com repositorios.
+- Fontes PlantUML atuais foram geradas em `lotojogo/diagrams` em 2026-07-25; os PNGs legados na mesma pasta podem estar desatualizados.
 - `poolSize` precisa de decisao de produto: quantidade de numeros disponiveis ou quantidade de combinacoes possiveis.

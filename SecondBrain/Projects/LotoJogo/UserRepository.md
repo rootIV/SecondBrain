@@ -1,8 +1,8 @@
-# UserRepository
+﻿# UserRepository
 
 Relacionado: [[Repositories]], [[Auth]], [[AuthService]], [[Backend]].
 
-Arquivo: `lotojogo-back-end/Infrastructure/Repositories/UserRepository.cs`.
+Arquivo: `lotojogo-api/Infrastructure/Repositories/UserRepository.cs`.
 
 ## Responsabilidade
 

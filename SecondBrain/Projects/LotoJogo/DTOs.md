@@ -1,10 +1,10 @@
-# DTOs
+﻿# DTOs
 
 Relacionado: [[LotoJogo - MOC]], [[Backend]], [[Frontend]], [[Auth]], [[LoteService]], [[GenerateService]].
 
 ## Backend
 
-DTOs e requests vivem em `lotojogo-back-end/Models`.
+DTOs e requests vivem em `lotojogo-api/Models`.
 
 Arquivos principais:
 

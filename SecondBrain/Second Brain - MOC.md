@@ -1,9 +1,9 @@
----
+﻿---
 tags:
   - second-brain
   - moc
   - knowledge-management
-updated: 2026-06-05
+updated: 2026-07-16
 ---
 
 # Second Brain - MOC
@@ -39,10 +39,10 @@ Mapa operacional do vault. Este arquivo e o ponto de entrada para agentes e manu
 
 ## Fontes oficiais
 
-- Vault: `C:\Users\Vitor\Documents\SecondBrain`
-- Conteudo principal do vault: `C:\Users\Vitor\Documents\SecondBrain\SecondBrain`
+- Vault: `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain`
+- Conteudo principal do vault: `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain\SecondBrain`
 - Projetos:
-  - `C:\Users\Vitor\Documents\Projects\lotojogo`
+  - `C:\Users\root4\OneDrive\Documents\Projetcts\Lotojogo`
   - `C:\Users\Vitor\Documents\Projects\aika_og`
   - `C:\Users\Vitor\Documents\Projects\consent`
   - `C:\Users\Vitor\Documents\Projects\motioninbet`
@@ -52,3 +52,4 @@ Mapa operacional do vault. Este arquivo e o ponto de entrada para agentes e manu
 - `LotoJogo` e `Consent` possuem `graphify-out/`; usar Graphify como orientacao tecnica inicial quando houver grafo disponivel.
 - `Aika OG` contem contratos binarios sensiveis. Mudancas em `EncDec`, keys, opcodes ou layout de pacote exigem validacao explicita com cliente real.
 - O vault possui notas antigas ou vazias em `Skills`; elas devem funcionar como indices de conhecimento, nao como substitutas das skills reais instaladas em `.codex`.
+- Para LotoJogo neste ambiente, o Codex deve iniciar por [[LotoJogo - MOC]] e [[Agent Context Rules]], usar `rtk`/Graphify para reduzir saida e aplicar a curadoria de skills registrada em [[LotoJogo Development Skill]].

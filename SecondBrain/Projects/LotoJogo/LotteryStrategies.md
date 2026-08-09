@@ -12,6 +12,10 @@ Uso atual:
 - A otimizacao nao trata sorteios anteriores como unica fonte de verdade: ela combina distribuicoes historicas com uma gama mais ampla de alternativas validas para evitar sugestoes repetidas demais.
 - `BetInsightService` calcula estatisticas de uma aposta gerada: frequencia media das dezenas no historico, comparacao com o ultimo sorteio e se a combinacao ja cobriu algum sorteio anterior.
 - A UI apresenta essas estatisticas como apoio de leitura, nao como garantia de resultado. O painel de otimizacao tambem mostra detalhes da base analisada e da configuracao sugerida.
+- `HistoricalStrategyInsightService` analisa apostas antigas do proprio usuario e retorna frequencias pessoais, estrategias mais/menos usadas e sugestoes geraveis baseadas nesse historico.
+- `GET /Lotes/historical/strategy-insights` ignora jogos futuros `Scheduled`; usa concursos `Drawn`, apostas bloqueadas/importadas ou apostas com custo/premio real como fonte historica pessoal.
+- As sugestoes pessoais saem como `StrategyConfig` para `fixed_number`, `exclude_number`, `odd_even`, `high_low` e `sum`, limitadas por plano via `PlanQuotaPolicy`.
+- No frontend, `features/strategies/historicalStrategySuggestions.ts` converte sugestoes pessoais em `StrategyInstance` com metadata `optimization.source = "user-historical-bets"`; a aba Gerenciar pode aplicar a sugestao diretamente na aba Configurar.
 
 ## Estrategias atuais
 

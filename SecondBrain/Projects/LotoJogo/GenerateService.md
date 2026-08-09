@@ -1,8 +1,8 @@
-# GenerateService
+﻿# GenerateService
 
 Relacionado: [[LoteService]], [[LotteryStrategies]], [[DTOs]], [[Tests]].
 
-Arquivo: `lotojogo-back-end/Services/GenerateService.cs`.
+Arquivo: `lotojogo-api/Services/GenerateService.cs`.
 
 ## Responsabilidade
 

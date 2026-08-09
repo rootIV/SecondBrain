@@ -1,16 +1,16 @@
-# Repositories
+﻿# Repositories
 
 Relacionado: [[LotoJogo - MOC]], [[Backend]], [[LoteRepository]], [[UserRepository]], [[LoteService]], [[AuthService]].
 
 ## Padrao atual
 
-Contratos ficam em `lotojogo-back-end/Application/Interfaces`:
+Contratos ficam em `lotojogo-api/Application/Interfaces`:
 
 - `ILoteRepository`
 - `IUserRepository`
 - `IStrategyTemplateRepository`
 
-Implementacoes EF Core ficam em `lotojogo-back-end/Infrastructure/Repositories`:
+Implementacoes EF Core ficam em `lotojogo-api/Infrastructure/Repositories`:
 
 - [[LoteRepository]]
 - [[UserRepository]]

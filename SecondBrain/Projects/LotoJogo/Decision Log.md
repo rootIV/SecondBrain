@@ -1,5 +1,76 @@
-# Decision Log
+﻿# Decision Log
 
+## 2026-08-08 - Auditoria e normalizacao de sorteios historicos
+
+- Decisao: `LotteryGameCatalog` normaliza aliases legados do seed (`loto_mania`, `time_mania`, `dia_sorte`) para os nomes canonicos `lotomania`, `timemania` e `dia_de_sorte`.
+- Decisao: `LotteryDrawSeedService` grava novos imports com `game_type` canonico e `LotteryDrawRepository` consulta aliases para preservar bancos que ja tenham linhas antigas com nomes legados.
+- Decisao: admins podem chamar `GET /Admin/lottery-draws/coverage` para auditar cobertura por modalidade, incluindo maior concurso conhecido, concursos faltantes, ordens faltantes e amostras dos primeiros gaps.
+- Decisao: `POST /Admin/lottery-draws/import-caixa` suporta todas as modalidades do `LotteryGameCatalog` via `OfficialCaixa:ContestUrlTemplate`, reutiliza `LotteryProviderJson.ParseContest` e limita cada request a 500 concursos.
+- Atualizacao em 2026-08-08: admins tambem podem usar `POST /Admin/lottery-draws/import-text` para importar sorteios antigos por CSV/TSV/texto com cabecalho (`concurso`, `data`, `numeros`, opcionalmente `modalidade`, `drawOrder`, `trevos`, `columns`, `extras`). O parser valida tamanho total, tamanho de linha, quantidade de linhas, modalidade, data, concurso, universo numerico e extras antes de delegar a persistencia idempotente ao `LotteryDrawSeedService`.
+- Decisao: o contrato textual foi documentado em `lotojogo-api/docs/lottery-draw-import.md`; isso vira fallback operacional quando a importacao oficial for bloqueada por `429/403`.
+- Atualizacao em 2026-08-08: o frontend exibe um painel admin na aba Gerenciar para importar sorteios antigos por TXT/CSV, baixar modelo por modalidade e visualizar resumo de cobertura; o painel so renderiza quando `/Account/entitlement` retorna `role = Admin`.
+- Atualizacao em 2026-08-08: a importacao textual de sorteios tambem faz upsert idempotente em `LotteryContests` como `Drawn`, permitindo que concursos antigos existam no dominio sem depender de importacao de apostas; para nao poluir o seletor de geracao, `GET /LotteryContests?category=...` filtra concursos historicos e retorna apenas `Scheduled` para categorias.
+- Evidencia em 2026-08-08: seed local cobre sem lacunas `loto_facil`, `mega_sena`, `quina`, `lotomania`, `dupla_sena`, `dia_de_sorte` e `timemania`; o concurso 1623 da Timemania foi adicionado ao seed como `timemania` canonico.
+- Caveat em 2026-08-08: `super_sete` ainda falta 1-879 e `mais_milionaria` ainda falta 1-375 no seed; a tentativa de preencher em massa pela API oficial da Caixa foi interrompida por `429` e `403` no edge Azion/ShieldSquare para o IP local. Usar download oficial de resultados quando acessivel, ou retomar importacao por intervalos depois do desbloqueio.
+- Verificacao: `docker exec lotojogo-api-dev-1 dotnet test /app/lotojogo-api.Tests/lotojogo-api.Tests.csproj --verbosity minimal` passou com 382 testes; `dotnet build lotojogo-api\lotojogo-api.csproj --no-restore --verbosity minimal` passou no host.
+- Relacionado: [[Backend]], [[LotteryDraws]], [[LotteryStrategies]], [[Tests]].
+
+## 2026-08-08 - Importacao historica de apostas e quotas por plano
+
+- Decisao: apostas antigas importadas/manualizadas reutilizam `Lotes`, `LoteStrategies` e `Bets`; cada aposta importada entra como estrategia `manual` bloqueada (`is_locked`) para evitar regeneracao/edicao acidental do registro historico.
+- Decisao: `POST /Lotes/historical/import` aceita linhas estruturadas, TXT simples, CSV semicolon padronizado com `numeros;valor;premio;titulo` ou `bets[]` estruturado; o frontend le `.txt/.csv`, oferece modelos CSV/XLSX baixaveis, parseia XLSX no navegador com limites de tamanho/linhas/celulas e permite cadastrar uma aposta antiga manual por campos, sem upload binario para o servidor nesta fatia.
+- Atualizacao em 2026-08-09: o modelo CSV/XLSX de apostas antigas inclui `concurso` e `data`; o backend tambem aceita esses metadados por linha em arquivo delimitado ou `bets[]` estruturado, desde que a importacao represente um unico concurso/data por lote.
+- Atualizacao em 2026-08-09: o frontend aceita importacao TXT/CSV/XLSX sem preencher `Concurso`/`Data` na tela quando o arquivo ja contem cabecalho de metadados ou a planilha estruturada ja gerou `bets[]` com `contestNumber`/`drawDate`; entrada manual continua exigindo metadados na tela.
+- Decisao: `Bets` passou a ter `stake_amount` e `prize_amount` opcionais; lotes retornam `totalPrize` e `netResult`, usando `stake_amount` real quando presente e a tabela atual apenas como fallback para apostas geradas.
+- Decisao: quotas por plano ficam centralizadas em `PlanQuotaPolicy` e aparecem em `/Account/entitlement`: Basic importa ate 20 apostas por lote, Pro ate 200 e Bolao ate 1000.
+- Caveat: premios reais por faixa/rateio historico ainda nao sao calculados automaticamente porque `LotteryDraws` guarda dezenas/metadados, mas nao rateios/premiacoes da Caixa; `prize_amount` pode ser informado na importacao estruturada e a UI TXT inicial cobre modalidades numericas convencionais.
+- Verificacao: `rtk dotnet test lotojogo-api.Tests\lotojogo-api.Tests.csproj --verbosity minimal`; `rtk npm test`; `rtk npm run lint`; `rtk npm run build`; `dotnet test lotojogo-api/lotojogo-api.Tests/lotojogo-api.Tests.csproj --verbosity minimal`; `npm.cmd test`; `npm.cmd run lint`; `npm.cmd run build`.
+- Relacionado: [[Backend]], [[Frontend]], [[LotteryDraws]], [[LotteryStrategies]], [[Tests]].
+
+## 2026-08-08 - Estrategias derivadas das apostas antigas do usuario
+
+- Decisao: `GET /Lotes/historical/strategy-insights` calcula estatisticas apenas de apostas historicas: concursos `Drawn`, apostas bloqueadas/importadas ou apostas com custo/premio real, ignorando jogos futuros `Scheduled`.
+- Decisao: o contrato retorna frequencia das dezenas mais/menos usadas, estrategias mais/menos usadas, totais financeiros e sugestoes ja no formato `StrategyConfig` (`fixed_number`, `exclude_number`, `odd_even`, `high_low`, `sum`).
+- Decisao: `PlanQuotaPolicy` tambem limita quantidade de sugestoes por plano: Basic 3, Pro 8, Bolao 12. Basic recebe somente sugestoes sem `requiresPaidPlan`.
+- Decisao: o frontend mostra as sugestoes na aba Gerenciar junto da importacao, permite copiar a config JSON e permite aplicar a sugestao diretamente na aba `Configurar`.
+- Decisao: a aplicacao direta usa `features/strategies/historicalStrategySuggestions.ts` para converter a sugestao em `StrategyInstance`, clonando config e marcando `optimization.source = "user-historical-bets"`.
+- Decisao: sugestoes com `requiresPaidPlan` ficam bloqueadas para uso direto na UI quando o plano nao permite, mas continuam visiveis/copiaveis.
+- Atualizacao em 2026-08-08: o mesmo endpoint tambem le `LotteryDraws` da modalidade e retorna `drawCount`, `mostDrawnNumbers` e `leastDrawnNumbers`; quando o plano permite frequencia, adiciona sugestoes `most_frequent` e `less_frequent` baseadas nos sorteios importados. Sugestoes `draw-*` aplicadas pelo frontend recebem `optimization.source = "lottery-draws"`.
+- Atualizacao em 2026-08-08: a UI da aba Gerenciar passou a exibir rankings separados de "mais/menos usados" nas apostas antigas e "mais/menos sorteadas" nos sorteios importados; sugestoes premium agora usam `quotas.frequencyStrategiesEnabled` em vez de bloquear todo `requiresPaidPlan` indiscriminadamente.
+- Atualizacao em 2026-08-08: plano Bolao recebe pacote avancado de sugestoes historicas com `prime_count`, `multiple_count`, `ending_digit`, `range_count`, `f1f2f3` e uma sugestao `sum` com `combinations` (`prime_count`, `range_count`, `max_sequence`); cada sugestao e verificada contra `StrategyRequestValidator` e `StrategyCapacityCalculator` para evitar filtros impossiveis.
+- Atualizacao em 2026-08-08: o projeto de testes backend desabilita paralelizacao de xUnit porque `StrategyOptimizerService` usa cache historico estatico invalidado por imports/syncs, evitando falso negativo entre testes concorrentes.
+- Verificacao: `rtk dotnet test lotojogo-api.Tests\lotojogo-api.Tests.csproj --verbosity minimal`; `rtk npm test`; `rtk npm run lint`; `rtk npm run build`; `npm.cmd test`; `npm.cmd run lint`; `npm.cmd run build`; `docker exec lotojogo-api-dev-1 dotnet test /app/lotojogo-api.Tests/lotojogo-api.Tests.csproj --verbosity minimal`; `npm.cmd test`; `npm.cmd run lint`; `npm.cmd run build`.
+- Relacionado: [[Backend]], [[Frontend]], [[LotteryStrategies]], [[Tests]].
+
+## 2026-08-08 - Disponibilidade de concurso para geracao
+
+- Decisao: concurso disponivel para gerar apostas exige `Status == Scheduled`, sem conflito de verificacao e antes do fechamento de apostas calculado em `America/Sao_Paulo`.
+- Decisao: o cutoff padrao e domingo 10h e demais dias 20h, derivado do cronograma CAIXA de sorteio domingo 11h ou demais 21h menos 1 hora; overrides por modalidade/data ficam em `LotteryContestAvailability`.
+- Decisao: snapshots externos com `NextDrawDate` anterior ao dia atual no Brasil sao rejeitados pelo validator para forcar fallback quando a API oficial estiver atrasada.
+- Decisao: DTOs de concursos expoem `isAvailable`, `unavailableReason`, `drawDateTime` e `salesCloseAt`; frontend deve desabilitar concursos vencidos/apurados e bloquear geracao localmente antes de chamar `/Generate`.
+- Motivo: impedir que concursos como Lotofacil 3756 continuem selecionaveis quando a CAIXA ainda retorna um proximo concurso ja vencido.
+- Verificacao: `rtk dotnet test lotojogo-api.Tests\lotojogo-api.Tests.csproj`; `rtk npm test`; `rtk npm run lint`; `rtk npm run build`.
+- Relacionado: [[Backend]], [[Frontend]], [[LotteryDraws]], [[Tests]].
+
+## 2026-08-02 - Concursos cache-first no backend
+
+- Decisao: `GET /LotteryContests` e a UI autenticada devem tratar o banco como fonte principal para concursos, retornando cache salvo sempre que existir e usando APIs externas apenas via refresh server-side.
+- Decisao: o parametro opcional `forceRefresh=true` apenas solicita refresh no servidor; o frontend nao deve fazer rotacao ou fallback direto entre APIs de loteria.
+- Decisao: concursos retornam `isStale` para a UI diferenciar cache vencido de erro fatal; erro bloqueante so deve ocorrer quando nao houver nenhum dado utilizavel no banco.
+- Atualizacao em 2026-08-02: `GET /LotteryContests` nao aguarda provider externo; ele dispara refresh server-side em background e retorna apenas o cache do banco, ou `503` rapido se ainda nao houver cache.
+- Atualizacao em 2026-08-02: datas de providers da Caixa em `dd/MM/yyyy` devem ser parseadas antes da cultura invariavel para evitar salvar `01/08/2026` como janeiro; proximo concurso com data passada pode ser salvo como `Stale`.
+- Motivo: reduzir dependencia de terceiros no carregamento da dashboard e evitar que falhas temporarias de provider bloqueiem concursos ja salvos.
+- Verificacao: `rtk dotnet test lotojogo-api.sln`, `rtk npm run lint`, `rtk npm run test`, `rtk npm run build`.
+- Relacionado: [[Backend]], [[Frontend]], [[LotteryDraws]].
+
+## 2026-07-16 - Codex, SecondBrain e skills curadas
+
+- Decisao: tratar `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain` como memoria operacional do Codex para LotoJogo.
+- Decisao: instalar um perfil curado de skills em `C:\Users\root4\.codex\skills`: Obsidian, C#/.NET, React/TypeScript, qualidade e `impeccable`.
+- Decisao: nao duplicar Superpowers como skill local porque ja esta disponivel via plugin instalado.
+- Decisao: usar `rtk` e Graphify antes de leituras amplas; LLMLingua fica como ferramenta experimental de compressao, nao como fluxo padrao.
+- Motivo: reduzir consumo de token, evitar skills concorrentes e aumentar precisao na escolha de ferramenta por tipo de tarefa.
+- Consequencia: novas tarefas devem iniciar por [[LotoJogo - MOC]] e [[Agent Context Rules]], depois expandir para codigo somente no subrepo relevante.
 ## 2026-06-24 - Dominio canonico sem www
 
 - Decisao: manter `SITE_DOMAIN` e `FRONTEND_URL` apontando para `lotojogo.com.br` como origem canonica.
@@ -10,12 +81,12 @@
 
 ## 2026-06-24 - Graphify integrado ao runtime do Codex
 
-- Decisao: instalar `graphifyy` no Python bundled do Codex e instalar a skill oficial em `C:\Users\Vitor\.codex\skills\graphify`.
+- Decisao: instalar `graphifyy` no Python bundled do Codex e instalar a skill oficial em `C:\Users\root4\.codex\skills\graphify`.
 - Decisao: configurar o MCP Graphify no `.codex/config.toml` do LotoJogo, apontando para `graphify-out/graph.json`.
 - Decisao: manter `multi_agent = true` e `PYTHONIOENCODING=utf-8` na configuracao global do Codex.
 - Decisao: usar `graphify update . --force` para atualizacao incremental somente de codigo, sem depender de uma chave LLM.
 - Atualizacao em 2026-06-25: reinstalar `graphifyy==0.8.49` quando o runtime bundled perder o pacote e manter `...\python\Scripts` no PATH de usuario para que novas sessoes resolvam `graphify` sem ajuste manual.
-- Atualizacao em 2026-06-25: manter as skills `graphify` de `C:\Users\Vitor\.codex`, `C:\Users\Vitor\.agents` e `C:\Users\Vitor\.claude` sincronizadas com a versao instalada para evitar avisos de incompatibilidade.
+- Atualizacao em 2026-06-25: manter as skills `graphify` de `C:\Users\root4\.codex`, `C:\Users\root4\.agents` e `C:\Users\root4\.claude` sincronizadas com a versao instalada para evitar avisos de incompatibilidade.
 - Motivo: o grafo existia, mas o pacote Python/CLI nao estava instalado no runtime que o Codex usa, deixando `graphify` indisponivel no PATH.
 - Relacionado: [[Agent Context Rules]], [[Known Issues]], [[Architecture]].
 
@@ -153,7 +224,7 @@ Tradeoff:
 Decisao atual no vault:
 
 - Foi criada a nota [[Agent Context Rules]].
-- O agente deve iniciar buscas e edicoes pelo subprojeto relevante: `lotojogo-front-end`, `lotojogo-back-end`, `lotojogo-tests` ou vault.
+- O agente deve iniciar buscas e edicoes pelo subprojeto relevante: `lotojogo`, `lotojogo-api`, `lotojogo-tests` ou vault.
 - A pasta pai `lotojogo` deve ser usada apenas para coordenacao, Docker e arquivos raiz.
 - Obsidian so deve ser atualizado quando o usuario pedir explicitamente.
 
@@ -610,6 +681,89 @@ Motivo:
 Tradeoff:
 
 - O teto continua global e defensivo, nao uma validacao especifica por categoria. Needs verification se o backend passar a exigir `maxNumbers` exatamente igual a modalidade selecionada.
+
+# 2026-08-09
+
+## Precos historicos configuraveis para apostas importadas
+
+Decisao atual no codigo:
+
+- A importacao historica de apostas preserva `valor` por linha e `DefaultStakeAmount` como fontes primarias de gasto real.
+- Quando a aposta importada nao traz valor, o backend tenta preencher `StakeAmount` usando `HistoricalLotteryPrices:Entries`, com `Category`, `EffectiveFrom` e tabela `Prices` por quantidade de dezenas.
+- A entrada mais recente com `EffectiveFrom <= data do sorteio` vence.
+- A tabela de precos historicos fica vazia por padrao; precos reais devem ser adicionados por configuracao de ambiente quando confirmados.
+- Para aposta historica importada sem valor e sem preco configurado, o custo permanece desconhecido em vez de cair no preco atual da modalidade.
+- A resposta de importacao expõe `estimatedStakeCount` e `missingStakeCount` para a UI informar custo estimado ou ainda desconhecido.
+
+Motivo:
+
+- Evitar que gasto antigo seja mascarado com preco de aposta atual.
+- Permitir gestao financeira por epoca sem hardcodar fatos historicos nao verificados no codigo.
+
+Tradeoff:
+
+- Sem tabela historica configurada, alguns gastos importados podem ficar zerados/desconhecidos no resumo ate o usuario informar `valor` ou o ambiente configurar a vigencia correta.
+- A acuracia historica passa a depender da qualidade da fonte usada para preencher `HistoricalLotteryPrices`.
+
+## Quotas historicas visiveis na UI
+
+Decisao atual no codigo:
+
+- O contrato `EntitlementResponse` ja expõe `PlanQuotaDto` com limites separados por plano.
+- O painel de importacao historica resume o plano ativo com limite de apostas por importacao, numero de sugestoes e disponibilidade de estrategias de frequencia.
+- O helper frontend `planQuotaSummary` centraliza essa frase para evitar textos divergentes entre componentes.
+- Os limites de geracao tambem sao comerciais por plano e ficam dentro do teto tecnico global: Basic gera ate 2 estrategias e 10 apostas por estrategia; Pro ate 4 estrategias e 50 apostas por estrategia; Bolao ate 6 estrategias e 100 apostas por estrategia.
+- `GenerateController` valida esses limites apos carregar o usuario e antes de chamar `LoteService.GenerateAsync`; `SecurityLimits` continua como limite defensivo global.
+- `useStrategyBuilder` replica a mesma validacao de quota antes de abrir review/gerar para dar feedback local e evitar chamada desnecessaria ao backend.
+- A mesma validacao local tambem roda ao adicionar estrategia, aplicar sugestao historica, clonar estrategia e aplicar template, considerando apostas manuais como estrategias `manual` de uma aposta cada.
+- Edicoes em estrategias existentes tambem passam pela quota local; por exemplo, aumentar `bets` acima do limite do plano e recusado antes de alterar o rascunho.
+
+Motivo:
+
+- Tornar Free/Pro/Bolao mais compreensiveis no fluxo em que o limite afeta o usuario, em vez de aparecer apenas como erro de backend.
+
+Tradeoff:
+
+- Ainda nao ha tela comercial completa de comparacao de planos; o painel historico mostra apenas os limites diretamente relevantes para importacao e sugestoes.
+
+## Importacao historica para modalidades especiais
+
+Decisao atual no codigo:
+
+- O importador historico aceita `trevos` para +Milionaria em TXT/CSV/XLSX e aposta manual.
+- O importador historico aceita `colunas`/`columns` para Super Sete no formato de sete grupos separados por `|`, por exemplo `0|1|2|3|4|5|6`.
+- Para Super Sete, o payload persiste `columns` para avaliacao de premio; a lista `numbers` serve como contagem/compatibilidade e pode conter digitos repetidos em colunas diferentes.
+- O painel de importacao historica nao filtra mais +Milionaria e Super Sete.
+
+Motivo:
+
+- Aproximar a gestao historica de "todos os jogos", cobrindo modalidades que exigem metadados alem de dezenas numericas simples.
+
+Tradeoff:
+
+- O formato de Super Sete e especifico do app e precisa ser documentado para evitar confusao com dezenas tradicionais; por isso `colunas` e separado de `numeros`.
+
+## Performance e uso de estrategias historicas
+
+Decisao atual no codigo:
+
+- `GET /Lotes/historical/strategy-insights` retorna `bestPerformingStrategies` e `worstPerformingStrategies`, agrupadas por `StrategyType`, com contagem, gasto, premio, resultado liquido e multiplicador de retorno.
+- Quando uma estrategia geravel tem retorno historico positivo, o endpoint pode sugerir `user-best-performing-strategy`, convertendo o perfil historico para uma config valida de geracao.
+- O mesmo endpoint tambem transforma a estrategia mais usada e a menos usada pelo usuario em sugestoes geraveis `user-most-used-strategy` e `user-least-used-strategy`, ignorando `manual` e `random` como tipos diretos.
+- As configs geradas para esses perfis reutilizam as regras de `odd_even`, `high_low`, `fixed_number` ou `sum` conforme o tipo historico, e sao cobertas por `StrategyRequestValidator`/`StrategyCapacityCalculator` nos testes.
+- O frontend exibe um resumo compacto de melhor retorno e maior prejuizo no painel de importacao historica quando esses dados existem.
+- A listagem detalhada de apostas historicas exibe, quando a aposta esta expandida, acertos calculados contra o sorteio importado, ordem do sorteio, valor apostado, premio informado e liquido por aposta.
+- `LoteSummaryDto` tambem expoe resumo de resultado por lote (`winningBets`, `lostBets`, `awaitingBets`, `bestHitCount`); a lista de lotes usa esses campos para mostrar apostas premiadas e melhor acerto sem abrir o lote.
+- A exportacao de lotes em CSV/PDF inclui dados historicos por aposta: status de resultado, acertos, sorteio, concurso, valor apostado, premio e liquido; o PDF tambem mostra totais de gasto/premio/liquido por lote quando disponiveis.
+- O projeto de testes backend referencia explicitamente `Microsoft.EntityFrameworkCore.Relational` 9.0.10 para alinhar a versao com a API e remover o warning de conflito EF durante `dotnet test`.
+
+Motivo:
+
+- Atender o requisito de gerar novas estrategias a partir de desempenho financeiro e de estrategias mais/menos usadas, sem deixar que jogos futuros ou estrategias manuais poluam o perfil.
+
+Tradeoff:
+
+- O ranking financeiro depende de `stake_amount` e `prize_amount`; historicos sem esses valores ainda entram nas frequencias e uso de estrategias, mas nao provam retorno financeiro.
 # 2026-06-11
 
 ## Home pública cinematográfica por capítulos
