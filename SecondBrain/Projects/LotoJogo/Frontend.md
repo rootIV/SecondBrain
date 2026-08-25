@@ -161,6 +161,7 @@ src/
 - Em 2026-07-02, a selecao de categoria saiu do `TopNav`; o canto direito foi reduzido para um pill com avatar por iniciais que alterna tema via `useTheme` e botao `Sair` que chama logout.
 - Em 2026-07-02, o `TopNav` passou a mostrar saudacao local (`Bom Dia`, `Boa Tarde` ou `Boa Noite`), nome do usuario, separador vertical e `Sair`; o avatar por iniciais continua alternando tema.
 - Em 2026-07-03, o `TopNav` ganhou uma engrenagem apos a saudacao; o tooltip abre por clique, fecha por Escape/clique externo e oferece as acoes reais `Tema` e `Perfil`.
+- Em 2026-08-13, a rota `/financeiro` ficou registrada em `App.tsx` como rota protegida para `features/financeiro/FinanceiroPage`; `TopNavSections` pode linkar para `/financeiro` somente enquanto essa rota existir.
 - A dashboard nao renderiza mais `RightProfileStatusBar`/`right-profile-area`; a `right-config-area` ocupa a altura lateral disponivel ao lado do painel principal.
 - `DashboardMain` nao renderiza mais `dashboard-header__brand` nem `dashboard-flow`; o `dashboard-ticker` assume o topo do painel principal.
 - O footer global foi adaptado para uma estrutura tipo 21st.dev: marca/logo, botoes sociais circulares, links principais, links legais e copyright/aviso de jogo responsavel.
@@ -256,6 +257,15 @@ Padrao atual observado:
   - `theme_color` → cor da barra superior em Android.
   - Permite instalacao em Android/iOS via "Adicionar a home screen".
 - Em 2026-08-01, `index.html` passou a declarar `lang="pt-BR"`, `translate="no"`, `class="notranslate"` e `<meta name="google" content="notranslate" />` para evitar que Chrome/Google Translate altere textos da UI em celulares, especialmente no dashboard autenticado.
+
+## SEO, indexacao e Google tags
+
+- Em 2026-08-09, o frontend passou a usar `https://lotojogo.com.br` como dominio canonico para canonical, sitemap, robots e metadados sociais.
+- As rotas indexaveis sao `/`, `/uso-responsavel`, `/termos` e `/privacidade`; rotas de app/autenticacao (`/dashboard`, `/dashboardPage`, `/login`, `/loginPage`, `/register`, `/registerPage`, `/profile`, `/_/ds-preview`) ficam fora do sitemap e recebem `noindex, nofollow`.
+- `src/seo/seo.config.ts` centraliza o contrato SEO, `SeoManager` atualiza metadados por rota e `googleTags.ts` carrega GA4/AdSense apenas em producao quando `VITE_GA_MEASUREMENT_ID` e `VITE_ADSENSE_CLIENT_ID` existem.
+- `scripts/seo-assets.mjs` gera `public/robots.txt`, `public/sitemap.xml` e `public/ads.txt` antes do build. `ADSENSE_PUBLISHER_ID` deve ser `pub-*`; `VITE_ADSENSE_CLIENT_ID` deve ser `ca-pub-*`.
+- Search Console usa meta tag injetada pelo plugin Vite quando `VITE_GOOGLE_SITE_VERIFICATION` existe. A validacao da propriedade e envio do sitemap permanecem passos manuais no painel do Google.
+- `scripts/pagespeed.mjs` mede PageSpeed Insights via `npm run pagespeed -- https://lotojogo.com.br`, com `PAGESPEED_API_KEY` opcional para uso frequente.
 
 ## Pontos de atencao
 

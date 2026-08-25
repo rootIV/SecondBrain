@@ -3,7 +3,7 @@ tags:
   - second-brain
   - moc
   - knowledge-management
-updated: 2026-07-16
+updated: 2026-08-20
 ---
 
 # Second Brain - MOC
@@ -16,6 +16,11 @@ Mapa operacional do vault. Este arquivo e o ponto de entrada para agentes e manu
 - [[Aika OG - MOC]]: servidor Aika, protocolo binario, GameServer, TokenServer, services e reverse engineering responsavel.
 - [[Consent - MOC]]: produto de confianca digital para acordos mutuos, consentimento dinamico e Safety Mode.
 - [[MotionInBet - MOC]]: API .NET, bot Windows Forms/Selenium, website React e fluxo de assinaturas via Pix/Mercado Pago.
+- [[EvoCine - MOC]]: landing Next.js, checkout PIX, entrega protegida do APK e recuperação por e-mail.
+
+## Carreira
+
+- [[Job Search - TI]]: busca ativa de vagas em TI, candidaturas, curriculos por vaga e bloqueios operacionais.
 
 ## Governanca
 

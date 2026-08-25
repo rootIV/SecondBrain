@@ -3,10 +3,23 @@ tags:
   - second-brain
   - decision-log
   - governance
-updated: 2026-06-05
+updated: 2026-08-10
 ---
 
 # Knowledge Decisions
+
+## 2026-08-10 - Selecionar CobraFlux como hipotese inicial de negocio digital autonomo
+
+- Decisao: tratar o micro-SaaS **CobraFlux** como hipotese comercial inicial para validacao: cobranca recorrente com Pix, boleto/cartao via gateway, regua automatica de lembretes e recuperacao de inadimplencia para pequenos negocios que cobram mensalidades.
+- Motivo: pesquisa de oportunidade indicou melhor combinacao entre dor financeira urgente, publico identificavel, recorrencia, baixo custo operacional, automacao alta e caminho plausivel para R$ 3.000/mes com cerca de 21 clientes no plano Pro de R$ 149/mes.
+- Alternativas descartadas:
+  - Agenda anti-no-show: descartada como primeira aposta por concorrencia muito alta, suporte operacional maior e diferenciacao mais dificil.
+  - Kit LGPD/cookies: descartado como primeira aposta por risco juridico, necessidade de autoridade externa e disposicao a pagar menos clara em PMEs.
+  - Assistente fiscal MEI/e-commerce: descartado como primeira aposta por complexidade regulatoria/fiscal, maior risco de suporte e concorrentes ERP fortes.
+  - Propostas/contratos + checkout: mantido como alternativa adjacente, mas descartado como foco inicial por recorrencia mais fraca.
+- Tradeoffs: a oportunidade vencedora tem concorrentes fortes como Asaas, Efi, Iugu, Mercado Pago e Cobre Facil; a diferenciacao deve ser uma camada operacional simples e nichada, nao um novo gateway de pagamento.
+- Impacto: antes de codigo, validar com entrevistas, landing page e pre-venda; MVP deve focar em transformar lista de clientes recorrentes em cobrancas acompanhadas automaticamente ate o pagamento.
+- Artefato: `C:\Users\root4\Documents\Codex\2026-08-10\files-mentioned-by-the-user-miss\outputs\relatorio-oportunidade-negocio-digital-autonomo.md`.
 
 ## 2026-06-05 - Camada de governanca antes de reorganizacao destrutiva
 

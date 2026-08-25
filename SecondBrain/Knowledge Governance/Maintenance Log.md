@@ -3,10 +3,47 @@ tags:
   - second-brain
   - maintenance
   - log
-updated: 2026-07-25
+updated: 2026-08-10
 ---
 
 # Maintenance Log
+
+## 2026-08-10 - Pesquisa de oportunidade para negocio digital autonomo
+
+### Problema
+
+Era necessario escolher uma oportunidade comercial real antes de implementar produto, evitando assumir uma ideia por preferencia tecnica.
+
+### Solucao aplicada
+
+- Pesquisadas oportunidades digitais para uma operacao solo com baixo custo e alta automacao.
+- Comparadas sete oportunidades em matriz ponderada com prioridade para primeira venda, aquisicao, automacao, recorrencia e potencial de R$ 3.000/mes.
+- Registrada em [[Knowledge Decisions]] a escolha do **CobraFlux** como hipotese inicial: micro-SaaS de cobranca recorrente Pix + regua de lembretes para pequenos negocios com mensalidades.
+
+### Resultado esperado
+
+A proxima etapa deve validar a hipotese comercial com entrevistas, landing page e pre-venda antes de escrever codigo.
+
+## 2026-08-10 - MVP local CobraFlux
+
+### Solucao aplicada
+
+- Implementado MVP local em `C:\Users\root4\Documents\Codex\2026-08-10\files-mentioned-by-the-user-miss\work\cobraflux-mvp`.
+- Backend ASP.NET Core com dominio de clientes, cobrancas, regua de lembretes, auth local, persistencia JSON, dashboard e gateway mock.
+- Frontend React/TypeScript/Vite com landing, cadastro/login, importacao de clientes, geracao de cobrancas, painel, funil e checkout mock.
+- Criados docs de arquitetura, pagamentos, seguranca, plano de marketing de 30 dias, README, `.env.example` e CI.
+
+### Verificacao
+
+- `dotnet test CobraFlux.slnx`: 6 testes passaram.
+- `npm.cmd test`: 1 teste passou.
+- `npm.cmd run build`: build passou.
+- `npm.cmd audit --audit-level=moderate`: 0 vulnerabilidades.
+- Fluxo HTTP validado: cadastro, criacao de cliente, geracao de cobranca, marcacao de pagamento e dashboard.
+
+### Caveat
+
+Pagamento real, WhatsApp oficial e deploy de producao dependem de credenciais externas; o MVP usa `MockPaymentGateway` e persistencia JSON para validacao local.
 
 ## 2026-06-05 - Leitura inicial e camada de governanca
 

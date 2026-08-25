@@ -1,6 +1,31 @@
-﻿# Decision Log
+# Decision Log
 
-## 2026-08-08 - Auditoria e normalizacao de sorteios historicos
+## 2026-08-19 - Uma tela de carregamento no boot
+
+- Decisao: o carregamento normal da SPA usa uma unica identidade visual baseada em `boot-loading`, tanto no `index.html` antes do JavaScript quanto no fallback React de `Suspense`/auth.
+- Motivo: ao iniciar Docker/Vite e abrir o site, o usuario via duas telas sequenciais de carregamento: `boot-loading` do HTML e `AppLoadingFallback` com skeleton.
+- Verificacao: `npm.cmd test -- src/App.routes.test.ts --run`, `npm.cmd run lint`, `npm.cmd run build` e `npm.cmd test -- --run` passaram no frontend.
+- Relacionado: [[Frontend]], [[Dashboard Redesign]], [[Known Issues]].
+
+## 2026-08-15 - Financeiro com primeira tela desacoplada
+
+- Decisao: a rota `/financeiro` deve carregar `FinanceiroPage` diretamente, sem aguardar o chunk do dashboard gerador.
+- Decisao: `useFinanceiro` passa a carregar primeiro o resumo base (`/Lotes`) e agenda/detalhes/insights financeiros em fase complementar agendada por `requestIdleCallback`.
+- Motivo: a dashboard financeira estava lenta tanto por link direto quanto vindo do dashboard porque pagava o custo do chunk de jogos e bloqueava a primeira tela em dados secundários.
+- Verificacao: `npm.cmd run lint`, `npm.cmd run build` e `npm.cmd test -- --run` passaram no frontend.
+- Relacionado: [[Frontend]], [[Dashboard Redesign]], [[Known Issues]].
+
+## 2026-08-14 - Hardening de auth, bots e segredos
+
+- Decisao: usar Cloudflare Turnstile como protecao anti-bot para endpoints publicos de auth (`/Auth/login`, `/Auth/register`, `/Auth/google`), com token validado server-side pela API antes de processar credenciais ou codigo Google.
+- Decisao: manter MySQL e nao migrar para Supabase; a alternativa a RLS e isolamento por API/repository com `UserId`, JWT em cookie HttpOnly, controllers autorizados, roles para admin, usuario DB read/write separado do read-only e nenhuma credencial DB no frontend.
+- Decisao: `VITE_TURNSTILE_SITE_KEY` e publico e pode entrar no bundle; `Turnstile:SecretKey` fica apenas no backend, via Docker secret/arquivo em producao.
+- Decisao: remover chaves de Data Protection e `.sonarqube` do indice Git do backend e ignorar `keys/`, `secrets/`, `.env.*`, credenciais e artefatos gerados. Historico antigo ainda exige purge coordenado e rotacao de credenciais fora do codigo.
+- Atualizacao: cadastro passa a autenticar o usuario quando a conta e criada, evitando consumir dois tokens Turnstile em sequencia no fluxo register -> login.
+- Atualizacao: resposta de importacao historica nao ecoa mais a linha bruta rejeitada; retorna linha e motivo, mas `Raw` sai nulo para reduzir reflexao/vazamento.
+- Verificacao: `dotnet build lotojogo-api.sln`; `dotnet list lotojogo-api.csproj package --vulnerable --include-transitive`; `dotnet test lotojogo-api.Tests\lotojogo-api.Tests.csproj --no-build --filter "FullyQualifiedName~HistoricalBetImport"`; `npm.cmd audit --omit=dev`; `npm.cmd run lint`; `npm.cmd run build`.
+- Caveat: purge de historico Git nao foi executado automaticamente porque reescreve commits e exige coordenacao de remote/force-push; o procedimento ficou documentado em `lotojogo-api/docs/security-hardening.md`.
+- Relacionado: [[Auth]], [[Backend]], [[Frontend]], [[Docker]], [[Known Issues]].`r`n`r`n## 2026-08-08 - Auditoria e normalizacao de sorteios historicos
 
 - Decisao: `LotteryGameCatalog` normaliza aliases legados do seed (`loto_mania`, `time_mania`, `dia_sorte`) para os nomes canonicos `lotomania`, `timemania` e `dia_de_sorte`.
 - Decisao: `LotteryDrawSeedService` grava novos imports com `game_type` canonico e `LotteryDrawRepository` consulta aliases para preservar bancos que ja tenham linhas antigas com nomes legados.
@@ -786,3 +811,38 @@ Motivo:
 Tradeoff:
 
 - Alguns capítulos compostos ocultam cards secundários no desktop para caber na viewport; todo o conteúdo continua disponível no mobile.
+
+## 2026-08-14 - Dashboard rapido com dados essenciais primeiro
+
+Decisao atual no codigo:
+
+- A primeira tela do dashboard autenticado deve depender apenas de `/Auth/me`, `/Account/entitlement`, concursos da modalidade ativa e estado local de rascunho.
+- Requests normais do dashboard nao devem chamar providers externos nem agendar refresh por cache vazio/stale; eles retornam o que existe no banco/cache imediatamente.
+- O refresh externo de concursos fica em thread de background (`LotterySyncHostedService`/`LotteryRefreshScheduler`) e em acao manual `forceRefresh=true`, fora do caminho critico do F5.
+- `LotteryContestRepository` usa `IMemoryCache` para leituras de concursos e invalida pelo `RepositoryCache` em `SaveChangesAsync`.
+- Quando existe ultimo concurso conhecido mas nao existe proximo concurso salvo, `LotterySyncService.EnsureScheduledPlaceholdersAsync` cria um proximo concurso `Provisional` com `Source = estimated:scheduler`; a API esconde datas desse placeholder ate haver dado verificado.
+- DTOs de concursos aceitam `scheduledDrawDate`, `drawDateTime` e `salesCloseAt` nulos para representar "data a confirmar".
+- O frontend persiste em `localStorage` o ultimo `/Auth/me`, entitlement e concursos por categoria para renderizar imediatamente apos F5 e revalidar em background.
+- No seletor de concurso da criacao/configuracao de estrategias, todos os estados do dropdown usam formato unico `xxxx - DD/MM/YY`; o prefixo `Concurso` fica fora do option para evitar duplicacao visual.
+- `RightConfigSideBar` deve disponibilizar Gerenciar e Admin imediatamente; a lentidao do primeiro load nao deve ser mitigada ocultando esses dados do usuario.
+- `HomeTab` importa `ConfigTab` diretamente para a aba Configurar carregar imediatamente; templates de estrategia continuam sob demanda.
+- Templates de estrategia nao sao buscados no mount de `useStrategyBuilder`; `useStrategyTemplates` usa React Query e só habilita ao abrir configuracao/templates ou pelo prefetch em idle.
+- A lista global de concursos e a primeira pagina de lotes entram em prefetch pós-primeira tela via `requestIdleCallback` com fallback de timeout.
+- `LotterySyncHostedService` respeita `LotterySync:InitialDelaySeconds` para evitar que chamadas externas de sincronizacao concorram com o primeiro dashboard após start local.
+
+Verificacao:
+
+- `npm.cmd run build`: `dashboardPage` final em 36,00 kB gzip e CSS inicial em 28,13 kB gzip.
+- `npm.cmd run lint`: passou.
+- `npm.cmd test -- --run`: 49 arquivos, 231 testes na revisao de cache-first.
+- `dotnet test .\lotojogo-api.Tests\lotojogo-api.Tests.csproj`: 402 testes na revisao de cache-first.
+- Docker dev recriado com `docker compose --env-file .env.development -f docker-compose.dev.yml up -d --build --force-recreate`, sem apagar volumes.
+
+Motivo:
+
+- Remover requests e chunks nao essenciais do carregamento inicial, especialmente Gerenciar/Lotes, Admin, templates e sync externo da Caixa, sem perder dados essenciais para gerar apostas.
+
+Tradeoff:
+
+- Abertura inicial de Gerenciar/Admin/Configurar pode carregar um chunk adicional na primeira visita da aba, mas a primeira tela do dashboard fica muito menor e com menos concorrencia de rede.
+

@@ -79,11 +79,13 @@ Relacionado: [[LotoJogo - MOC]], [[Tests]], [[Frontend]], [[LotteryStrategies]],
 ## Backend
 
 - O test project pode emitir warning de conflito de versao em `Microsoft.EntityFrameworkCore.Relational`.
+- 2026-08-14: Mitigado loop de refresh de concursos quando providers externos retornam vazio/404/500. `LotteryContestsController` retorna cache imediatamente e agenda refresh em background; `LotteryRefreshScheduler` tem cooldown configuravel em `LotterySync:TriggerCooldownSeconds` e `force-refresh` bypassa o cooldown.
 - A migration `AddUserEmailSecurityConstraints` cria indice unico em `Users.email`; se ja existirem e-mails duplicados em uma base real, a migration exigira limpeza previa desses registros. Needs verification em producao/dev compartilhado antes de aplicar.
 - Saved Strategies ainda persistem `generation_mode = combined`, mas a UI de Saved Strategies nao usa esse modo. A geracao combinada atual usa `config.combinations` no fluxo de gerar apostas.
 
 ## Frontend
 
+- Em 2026-08-15, a navegacao a partir da landing foi investigada no Docker dev. `/Auth/me` respondeu rapido (~0,1s), e modulos Vite aquecidos como `/src/pages/LoginPage.tsx` e `/src/pages/dashboardPage.tsx` responderam em ~2ms, mas o fallback HTML (`/login`) continuou em ~3s e arquivos de `public/` como `favicon.ico`, `robots.txt` e `lotojogo-logo.png` demoraram segundos via Vite. Causa provavel: gargalo do Vite dev servindo fallback/static public sobre Docker Desktop + workspace em OneDrive/Windows, agravado por assets grandes em `public/media`. Mitigacoes aplicadas: landing nao chama mais `/Auth/me` automaticamente em rotas publicas, Login/Register nao requisitam mais `lotojogo-logo.png`, rotas Login/Register/Dashboard sao preloaded por idle/hover/touch e o warmup do Vite inclui Home/Login/Register/Dashboard. Needs verification com preview/producao antes de atribuir essa latencia ao backend.
 - A fase base do [[Dashboard Redesign]] adicionou aliases limpos `/dashboard`, `/login`, `/register` e `/profile`, mas as rotas antigas `/dashboardPage`, `/loginPage` e `/registerPage` ainda existem para compatibilidade. Needs verification: decidir quando remover ou redirecionar definitivamente as rotas antigas.
 - `ProfilePage` completa depende de endpoints backend ainda nao confirmados para atualizar nome/foto/preferencias, alterar senha e excluir conta. Hoje o contrato confirmado no frontend e backend e `/Auth/me`. Needs verification antes de prometer CRUD de perfil.
 - Em 2026-05-13, `npm run lint` passou apos a refatoracao do frontend; se voltar a falhar, revalidar antes de considerar problema conhecido.
