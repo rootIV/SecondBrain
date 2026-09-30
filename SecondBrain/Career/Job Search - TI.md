@@ -5,7 +5,7 @@ tags:
   - job-search
   - ti
 status: active
-updated: 2026-08-10
+updated: 2026-09-10
 ---
 
 # Job Search - TI
@@ -18,8 +18,10 @@ updated: 2026-08-10
 - Local: Teresina, PI.
 - LinkedIn: https://www.linkedin.com/in/rootiv/.
 - GitHub: https://github.com/rootIV.
-- Portfolio publico: em preparacao local no projeto `root4-portfolio`; a versao atual organiza a apresentacao em capitulos, prioriza evidencias de projeto e ainda aguarda a direcao de arte com imagens proprias.
-- Direcao visual atualizada em 2026-08-18: portfolio tipografico e documental, sem imagens de apoio ou mockups artificiais; responsividade verificada de 320 px a 3840 px.
+- Portfolio: implementacao local em `C:\Projetcts\root4-portfolio\portfolio-jose-vitor`; publicacao em producao nao realizada nesta revisao.
+- Direcao aprovada e implementada em 2026-09-10: foco em clientes e projetos, obsidiana e cobre, selo rootIV, texto em primeira pessoa e cinco blocos (apresentacao, projetos, atuacao, sobre e contato). Substitui a direcao documental de capitulos de 2026-08-18.
+- Arte mineral gerada por image_gen em tres WebP locais (32 a 151 KB), sem representar evidencias de produtos. Duas descobertas opcionais no selo, acessiveis por teclado e toque. Contato por mailto e copia de e-mail, sem formulario/backend.
+- Verificacao local: lint, build e tres testes de clipboard aprovados; navegacao e visual inspecionados em 320, 390, 768, 1440 e 2560 px. Fragmentos antigos preservados; entrada direta aguarda montagem do React/fontes, sem reposicionar apos interacao do visitante. Detalhes e prompt registrados no README e em `docs/obsidian-art.md` do projeto.
 - Pretensao salarial minima: R$ 3.000.
 - Disponibilidade de trabalho: dia todo e madrugada.
 - Disponibilidade para entrevistas: dia todo.

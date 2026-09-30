@@ -1,5 +1,14 @@
 ﻿# Known Issues
 
+## Resolvido localmente em 2026-09-22: API reiniciando e concursos misturados
+
+- A API dev encerrava no startup porque o banco tinha `20260918172724_AddBillingOrders`, mas `20260919000412_AddEmbeddedBilling` tentava recriar `Users.MercadoPagoCustomerId` e `BillingOrders`. Migration ajustada para preservar a estrutura legada e adicionar apenas campos/índices ausentes. Pedidos e colunas legadas preservados; API e lista de lotes verificadas no navegador.
+- `useLotteryContests` persistia `keepPreviousData` de outra categoria no novo cache. Removida a reutilização entre categorias; cache local rejeita categorias incorretas e é revalidado ao abrir.
+- O editor usa o escopo do rascunho clicado, independente da seleção de concurso para geração. Edição não deve remover as regras que impedem gerar em concursos encerrados, conflitantes ou desconhecidos.
+- Atualizacao 2026-09-23: o control center agora usa `largestPrize` para o maior rateio e `accumulated` para o valor acumulado do sorteio; no payload Caixa do Dia de Sorte 1303, `valorAcumuladoProximoConcurso` e o "Valor acumulado" exibido por UOL sao o mesmo valor (`642.572,52`), enquanto `valorEstimadoProximoConcurso` e a estimativa do proximo concurso. `/LotteryDraws/latest` tambem foi corrigido para carregar `LotteryDrawExtras`; sem esse `Include`, o React recebia sorteios sem premio/acumulado e mostrava `Indisponivel`.
+- Verificação: 278 testes frontend, lint/build; 433 testes backend; MySQL novo/reaplicação e upgrade do banco dev; aposta manual e editor com/sem data no navegador; control center exibindo premios/acumulados reais apos reinicio da API.
+- Relatório: `C:\Projetcts\Lotojogo\lotojogo\docs\contest-draft-recovery-2026-09-22.md`.
+
 ## DNS apontando para EC2 antigo - registrado em 2026-07-16
 
 - Sintoma: o painel Hostinger mostrou `A @` apontando para `18.231.198.237`, mas o EC2 novo esta em `18.228.48.86`.
@@ -85,6 +94,7 @@ Relacionado: [[LotoJogo - MOC]], [[Tests]], [[Frontend]], [[LotteryStrategies]],
 
 ## Frontend
 
+- Em 2026-08-27, a landing em Docker dev (`http://127.0.0.1:5173`) retornou 500 para imports novos porque o volume nomeado `frontend_node_modules` estava desatualizado apos mudancas em `package.json`. Mitigacao confirmada: executar `docker compose -f docker-compose.dev.yml exec frontend-dev npm install` e reiniciar `frontend-dev`; depois disso os modulos responderam 200 e a landing abriu sem erros de console. Atualizacao em 2026-09-05: `class-variance-authority`, `clsx`, `tailwind-merge`, `tailwindcss` e `@tailwindcss/vite` foram removidos do frontend.
 - Em 2026-08-15, a navegacao a partir da landing foi investigada no Docker dev. `/Auth/me` respondeu rapido (~0,1s), e modulos Vite aquecidos como `/src/pages/LoginPage.tsx` e `/src/pages/dashboardPage.tsx` responderam em ~2ms, mas o fallback HTML (`/login`) continuou em ~3s e arquivos de `public/` como `favicon.ico`, `robots.txt` e `lotojogo-logo.png` demoraram segundos via Vite. Causa provavel: gargalo do Vite dev servindo fallback/static public sobre Docker Desktop + workspace em OneDrive/Windows, agravado por assets grandes em `public/media`. Mitigacoes aplicadas: landing nao chama mais `/Auth/me` automaticamente em rotas publicas, Login/Register nao requisitam mais `lotojogo-logo.png`, rotas Login/Register/Dashboard sao preloaded por idle/hover/touch e o warmup do Vite inclui Home/Login/Register/Dashboard. Needs verification com preview/producao antes de atribuir essa latencia ao backend.
 - A fase base do [[Dashboard Redesign]] adicionou aliases limpos `/dashboard`, `/login`, `/register` e `/profile`, mas as rotas antigas `/dashboardPage`, `/loginPage` e `/registerPage` ainda existem para compatibilidade. Needs verification: decidir quando remover ou redirecionar definitivamente as rotas antigas.
 - `ProfilePage` completa depende de endpoints backend ainda nao confirmados para atualizar nome/foto/preferencias, alterar senha e excluir conta. Hoje o contrato confirmado no frontend e backend e `/Auth/me`. Needs verification antes de prometer CRUD de perfil.
@@ -99,6 +109,8 @@ Relacionado: [[LotoJogo - MOC]], [[Tests]], [[Frontend]], [[LotteryStrategies]],
 
 ## Produto/Contrato
 
+- 2026-09-18: [[Checkout Mercado Pago]] implementado, mas requer migration `AddEmbeddedBilling`, credenciais e homologação no provedor antes de ativar. A landing anuncia Plus e benefícios sem correspondência nas quotas atuais; o checkout vende apenas Pro e Bolao com os limites implementados. Renovação é manual, sem cobrança recorrente.
+
 - `poolSize` tem significado ambiguo entre "disponiveis" e "combinacoes".
 - Em 2026-05-11, `dotnet test lotojogo-api.sln` passou no workspace atual. A divergencia conceitual de `poolSize` segue pendente ate decidir se o campo representa "disponiveis" ou "combinacoes".
 - `most_frequent` e `less_frequent` existem no frontend, mas nao tem algoritmo especifico no backend.
@@ -110,8 +122,8 @@ Relacionado: [[LotoJogo - MOC]], [[Tests]], [[Frontend]], [[LotteryStrategies]],
 ## Infra
 
 - Docker hot reload em Windows foi anotado como instavel em notas antigas; revalidar antes de tratar como bug atual.
-- O vault ativo do LotoJogo e `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain\SecondBrain\Projects\LotoJogo`; o duplicado antigo em `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain\Projects\LotoJogo` foi removido em 2026-05-16.
-- A pasta pai `C:\Users\root4\OneDrive\Documents\Projetcts\Lotojogo` nao e o repositorio Git principal; os repositorios Git encontrados ficam em `lotojogo` e `lotojogo-api`. Rodar comandos Git a partir do subprojeto correto.
+- O vault ativo do LotoJogo e `C:\Projetcts\SecondBrain\SecondBrain\Projects\LotoJogo`; o duplicado antigo em `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain\Projects\LotoJogo` foi removido em 2026-05-16.
+- A pasta pai `C:\Projetcts\Lotojogo` nao e o repositorio Git principal; os repositorios Git encontrados ficam em `lotojogo` e `lotojogo-api`. Rodar comandos Git a partir do subprojeto correto.
 - Em 2026-05-20, foram encontrados segredos reais em arquivos locais antes da limpeza: senha MySQL, JWT key e Google OAuth Client Secret. Mitigacao: rotacionar credenciais no MySQL/ambiente de producao e recriar o Google Client Secret no Google Cloud Console. Needs verification depois da rotacao.
 - O deploy seguro no EC2 precisa de dominio e TLS. Com `ASPNETCORE_ENVIRONMENT=Production`, cookies `Secure` exigem HTTPS; `http://IP` nao deve ser usado para fluxo autenticado. Needs verification apos configurar HTTPS.
 - Segredos em `.env` nao devem ser usados em producao. O compose de producao usa Docker secrets por arquivo; antes de producao real, avaliar migracao para AWS Secrets Manager, SSM Parameter Store ou mecanismo equivalente. Needs verification.

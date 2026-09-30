@@ -3,10 +3,36 @@ tags:
   - second-brain
   - maintenance
   - log
-updated: 2026-08-10
+updated: 2026-08-26
 ---
 
 # Maintenance Log
+
+## 2026-08-26 - Manutencao de skills e configuracao Codex
+
+### Problema
+
+O ambiente Codex acumulou skills de engenharia, RTK, frontend, Obsidian e projeto sem uma verificacao recente de compatibilidade de manifesto, cobertura por stack e roteamento global.
+
+### Solucao aplicada
+
+- Inventariadas skills em `C:\Users\root4\.codex\skills` e projetos em `C:\Users\root4\OneDrive\Documents\Projetcts`.
+- Confirmada stack recorrente: React/TypeScript/Next/Vite, ASP.NET Core/.NET 8-10, Docker, MySQL, Obsidian/Second Brain, Graphify e RTK.
+- Instaladas skills curadas oficiais `aspnet-core`, `security-best-practices` e `security-threat-model`.
+- Corrigidos manifestos inválidos em skills locais movendo metadados fora do schema (`triggers`, `effort`, `tags`, `version`) para `metadata` e adicionando `name` onde faltava.
+- Atualizado `C:\Users\root4\.codex\AGENTS.md` com roteamento por stack para ASP.NET Core, React/TypeScript, segurança e Obsidian.
+- Atualizado `C:\Users\root4\.codex\config.toml` com `project_doc_fallback_filenames = ["CLAUDE.md", ".cursorrules"]`.
+- Instalado `PyYAML` no Python local para permitir rodar o validador oficial `quick_validate.py`.
+
+### Verificacao
+
+- `py ...\quick_validate.py` passou para todas as skills pessoais em `C:\Users\root4\.codex\skills`.
+- `py -c "import tomllib ..."` confirmou que `C:\Users\root4\.codex\config.toml` continua com TOML valido.
+- Consulta oficial OpenAI confirmou o uso complementar de `AGENTS.md`, memorias, skills e MCP, e o modelo de progressive disclosure das skills.
+
+### Decisao
+
+Nenhuma skill valida foi removida neste ciclo. As duplicidades aparentes foram preservadas porque representam escopos diferentes: processo geral, stack especifica ou workflows RTK.
 
 ## 2026-08-10 - Pesquisa de oportunidade para negocio digital autonomo
 
@@ -130,3 +156,101 @@ O Codex estava configurado para consultar Graphify quando houvesse grafo, mas o 
 - `graphify god-nodes --top 3` funcionou contra o grafo existente do LotoJogo.
 - `rtk rg --files .` funcionou no mesmo projeto.
 - `multi_agent = true` ja estava ativo em `C:\Users\root4\.codex\config.toml`.
+
+## 2026-09-05 - Backup limpo Codex/Windows e novo caminho de projetos
+
+### Problema
+
+Projetos e Second Brain foram movidos para `C:\Projetcts`, mas a configuracao global do Codex ainda apontava para o caminho antigo no OneDrive.
+
+### Solucao aplicada
+
+- Atualizado `C:\Users\root4\.codex\AGENTS.md` para carregar `C:\Projetcts\SecondBrain\AGENTS.md`.
+- Adicionadas entradas confiaveis em `C:\Users\root4\.codex\config.toml` para `C:\Projetcts` e projetos principais.
+- Criado backup sanitizado em `outputs\codex-windows-clean-install-backup-2026-09-05-212807.zip`, com configs, skills, binarios auxiliares, inventarios e copia Markdown do Second Brain.
+- Excluidos `auth.json`, secrets, sessoes, logs, bancos SQLite, caches e plugin cache.
+
+### Verificacao
+
+- `config.toml.current` e `config.portable.toml` do backup parseiam com `tomllib`.
+- `backup-manifest.json`, `file-manifest.sha256.json` e `.skill-lock.json` parseiam como JSON.
+- Varredura do ZIP nao encontrou `auth.json`, SQLite, sessoes, caches ou secrets.
+
+## 2026-09-22 - Serena sem janelas automaticas
+
+### Problema
+
+Serena abria varias janelas/abas ao iniciar como MCP no Codex.
+
+### Solucao aplicada
+
+- Alterado `C:\Users\root4\.serena\serena_config.yml`: `web_dashboard_open_on_launch: false`.
+- Mantido `gui_log_window: false` e `web_dashboard: true`, deixando o dashboard disponivel sem abrir automaticamente.
+- Atualizado `C:\Users\root4\.codex\config.toml` para iniciar Serena com `--open-web-dashboard=false` e `--enable-gui-log-window=false`.
+- Encerradas instancias antigas do Serena que ainda rodavam com os argumentos anteriores.
+
+### Verificacao
+
+- `serena_config.yml` parseou corretamente.
+- `config.toml` parseou corretamente.
+- `codex mcp get serena` mostrou os novos argumentos.
+- Nao havia mais processos Serena antigos apos a limpeza.
+
+## 2026-09-22 - Backup Codex/Windows regenerado apos ajuste do Serena
+
+### Solucao aplicada
+
+- Atualizado o gerador de backup para incluir as flags do Serena no `config.portable.toml`.
+- Regenerado backup limpo do Codex/Windows com a configuracao que impede janelas automaticas do Serena.
+
+### Verificacao
+
+- Backup validado com parse de TOML e JSON.
+- Varredura do ZIP nao encontrou `auth.json`, SQLite, sessoes, caches ou secrets.
+
+## 2026-09-28 - Upgrade das animacoes do Codex Pet Nexo
+
+### Solucao aplicada
+
+- Criada [[Codex Pet Nexo]] como referencia operacional do pet customizado.
+- Regeneradas e instaladas as linhas `idle`, `waving`, `waiting` e `running` com identidade preservada.
+- Mantidas as demais animacoes e as 16 direcoes de olhar do atlas v2.
+- Registrado que o formato do pet nao suporta uma barra dinamica de consumo; o valor de 5 horas deve vir de Settings/Usage ou do usage dashboard do Codex.
+
+### Verificacao
+
+- Todas as linhas passaram na extracao e inspecao sem erros ou avisos.
+- O atlas instalado passou em `validate_atlas.py --require-v2` com `ok: true`, dimensoes `1536 x 2288`, RGBA e zero residuos RGB em pixels transparentes.
+
+## 2026-09-28 - Nexo Darkstorm
+
+### Solucao aplicada
+
+- Transformado o atlas v2 instalado do Nexo para um visual mais masculino e sombrio, com paleta azul-preta, contorno mais pesado, marca eletrica no peito e raios ciano/violeta anexados ao corpo.
+- Preservadas a grade `8 x 11`, as celulas `192 x 208`, a ordem das animacoes e as 16 direcoes de olhar.
+- Atualizada a descricao do pet em `C:\Users\root4\.codex\pets\nexo\pet.json`.
+
+### Verificacao
+
+- PNG intermediario e WebP final passaram em `validate_atlas.py --require-v2`.
+- O atlas instalado em `C:\Users\root4\.codex\pets\nexo\spritesheet.webp` passou com `ok: true`, dimensoes `1536 x 2288`, RGBA, zero residuos RGB em pixels transparentes, sem erros ou avisos.
+
+## 2026-09-30 - Plugins Ponytail e Agent Skills no Codex
+
+### Decisao
+
+- Ponytail compensa como plugin nativo do Codex para reforcar solucoes minimalistas sem remover verificacao, seguranca ou acessibilidade.
+- Agent Skills tambem foi instalado como plugin nativo para integracao oficial, embora o conteudo principal das 25 skills ja existisse em `C:\Users\root4\.codex\skills`.
+- O backup limpo continua excluindo `auth.json`, secrets, sessoes, logs, SQLite, caches e `plugins/cache`; a restauracao deve reinstalar plugins a partir dos marketplaces GitHub.
+
+### Solucao aplicada
+
+- Registrado marketplace `DietrichGebert/ponytail` e instalado `ponytail@ponytail` versao `4.10.0`.
+- Registrado marketplace `addyosmani/agent-skills` e instalado `agent-skills@agent-skills` versao `0.6.11`.
+- Gerado backup limpo em `C:\Users\root4\Documents\Codex\2026-09-30\co\outputs\codex-windows-clean-install-backup-2026-09-30-172435.rar`.
+
+### Verificacao
+
+- `codex plugin list` mostrou `ponytail@ponytail` e `agent-skills@agent-skills` como `installed, enabled`.
+- `config.toml.current`, inventario de plugins e `RESTORE.md` do backup registram os dois plugins e comandos de reinstalacao.
+- Varredura do RAR nao encontrou `auth.json`, SQLite, sessoes, caches, plugin cache ou secrets.

@@ -1,5 +1,14 @@
 # Decision Log
 
+## 2026-09-08 - Financeiro integrado ao dashboard central
+
+- Decisao: `Financeiro` deixou de ser uma pagina independente e passou a ser uma aba interna do dashboard em `/dashboard?aba=financeiro`; a rota protegida `/financeiro` redireciona para esse endereco.
+- Decisao: `DashboardPage` mantem uma unica `DashboardLinearRail` e um unico `DashboardControlCenter`; o workspace financeiro renderiza um centro proprio e um `right-config-area--financeiro` ao lado, enquanto as areas de apostas ficam montadas e ocultas com `hidden` para preservar rascunhos, selecao, configuracoes e menu anterior.
+- Decisao: `useFinanceiro` recebe `enabled` e so consulta dados quando a aba financeira esta ativa; o periodo selecionado permanece no modulo carregado sob demanda enquanto o usuario alterna entre financeiro e apostas.
+- Atualizacao: `FinanceiroShell`, `FinanceiroPage`, `financeiro-shell__aviso` e `DisclaimerCard` foram removidos da renderizacao; o preloading antigo de Financeiro agora aquece o dashboard e o chunk `FinanceiroDashboard`.
+- Verificacao: frontend validado com testes de rotas/componentes, lint, build e Playwright em 320, 768, 1024 e 1440 px, incluindo `/financeiro`, clique pela rail, voltar/avancar, uma unica rail/control center, ausencia dos avisos removidos e ausencia de overflow horizontal.
+- Relacionado: [[Frontend]], [[Dashboard Redesign]], [[Tests]].
+
 ## 2026-08-19 - Uma tela de carregamento no boot
 
 - Decisao: o carregamento normal da SPA usa uma unica identidade visual baseada em `boot-loading`, tanto no `index.html` antes do JavaScript quanto no fallback React de `Suspense`/auth.
@@ -90,7 +99,7 @@
 
 ## 2026-07-16 - Codex, SecondBrain e skills curadas
 
-- Decisao: tratar `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain` como memoria operacional do Codex para LotoJogo.
+- Decisao: tratar `C:\Projetcts\SecondBrain` como memoria operacional do Codex para LotoJogo.
 - Decisao: instalar um perfil curado de skills em `C:\Users\root4\.codex\skills`: Obsidian, C#/.NET, React/TypeScript, qualidade e `impeccable`.
 - Decisao: nao duplicar Superpowers como skill local porque ja esta disponivel via plugin instalado.
 - Decisao: usar `rtk` e Graphify antes de leituras amplas; LLMLingua fica como ferramenta experimental de compressao, nao como fluxo padrao.

@@ -1,5 +1,13 @@
 # Frontend
 
+## Dashboard operacional
+
+- Em 2026-09-08, `Financeiro` passou a ser aba interna de `/dashboard?aba=financeiro`; `/financeiro` redireciona para esse endereco protegido. `DashboardPage` preserva uma unica `DashboardLinearRail` e um unico `DashboardControlCenter`, renderiza `FinanceiroDashboard` sob demanda com `right-config-area--financeiro`, mantem as areas de apostas montadas e ocultas por `hidden`, e `useFinanceiro` so consulta quando a aba financeira esta ativa.
+- Em 2026-09-08, `DashboardControlCenter` passou a rotacionar categoria/proximo sorteio/ultimo sorteio a cada 18s, consumindo `/LotteryDraws/latest`; `Limites` e `Plano` permanecem estaticos. Validacao: `npm test -- DashboardControlCenter DashboardVisualContract`, `npm run lint`, `npm run build` e Playwright em 1440px/390px com mock de `LotteryContests`/`LotteryDraws`.
+- Em 2026-09-08, a `DashboardLinearRail` removeu `Configurar` e `Gerenciar` do fluxo principal, renomeou `Recarregar` para `Assinar` com icone de cifrao, adicionou `Bolao` e `Ajuda`, e removeu o wrapper `dashboard-rail__group` das modalidades. `right-config__tabs` ficou restrita a `Gerar`, `Configurar` e `Gerenciar`; `Admin` e `Assinar` nao aparecem mais como abas internas. O ticker de categoria/proximo/ultimo agora usa `AnimatePresence`, com fade de saida para cima e entrada de baixo para cima. Validacao: testes focados, lint, build e Playwright em 1440px/390px.
+- Em 2026-09-10, o `dashboard-control-area` manteve altura desktop fixa de 88px e passou a rotacionar todas as informacoes por categoria: categoria, proximo sorteio, ultimo sorteio, premiacao e acumulado. Os titulos ficam no canto superior esquerdo de cada bloco; categoria usa nomes quebrados manualmente (`Loto/Facil`, `Time/Mania`, `+Milio/Naria` etc.); `Proximo Sorteio` exibe concurso e status em linhas separadas; `Ultimo Sorteio` reserva uma grade de chips para ate 20 numeros em duas linhas e usa `-` entre concurso e data. A aba bloqueada `Configurar` usa cadeado cinza com blur forte, `quick-generation-review__category` foi reconstruido text-first sem icone, e a rail esquerda nao renderiza mais a secao `dashboard-rail__section--categories`. Validacao: testes focados de `DashboardControlCenter` e `DashboardVisualContract`, `npm run lint`, `npm run build`, `lotojogo-api.Tests` com 405 testes, e Playwright mockado em 1920/1280 sem overflow no control center.
+- Em 2026-09-07, a lista de lotes passou a manter filtros recolhiveis por um controle explicito no cabecalho; os lotes usam cards compactos com faixa lateral e a separacao visual da rail tambem inicia antes das modalidades. Validacao: `npm test -- --run src/pages/DashboardPage/DashboardVisualContract.test.ts`, `npm run lint` e `npm run build` no frontend.
+
 Relacionado: [[LotoJogo - MOC]], [[Architecture]], [[Auth]], [[Dashboard Redesign]], [[ApiService Frontend]], [[AuthService Frontend]], [[LoteService Frontend]], [[StrategyService Frontend]], [[LotteryStrategies]].
 
 ## Stack
@@ -18,18 +26,32 @@ Relacionado: [[LotoJogo - MOC]], [[Architecture]], [[Auth]], [[Dashboard Redesig
 
 ```text
 src/
-  components/
+  components/         # UI/layout
   contexts/
   domain/
   features/
   hooks/
-  pages/
+  pages/              # uma pasta por rota/pagina
   routes/
   services/
   strategies/
-  styles/
+  styles/             # SCSS centralizado: globals + arvore espelhada de components/pages/features/contexts
   types/
 ```
+
+## Refatoracao frontend 2026-09-01
+
+- A arquitetura de diretorios passou a usar `Page/Page.tsx` e `index.ts` para paginas (`HomePage`, `DashboardPage`, `LoginPage`, `RegisterPage`, `LegalPage`, `DsPreviewPage`); o SCSS correspondente fica em `src/styles/pages/...`.
+- Componentes principais preservados da dashboard (`MainCard`, `DashboardMain`, `LoteShowcaseCard`, `RightConfigSideBar`, `TopNav`) mantem TSX/testes em `src/components` e SCSS em `src/styles/components`, mantendo contratos HTTP, nomes de `localStorage`, regras de loteria e rotas legadas.
+- A rota `/dashboard` voltou a montar `DashboardMain/MainCard` no workspace principal; o botao `Nova aposta` aciona o modo manual por `manualModeRequestKey`, mantendo o editor de aposta manual no fluxo de producao.
+- A landing atual fica em `components/layout/home/landing`, com estilos em `src/styles/components/layout/home/landing`; `LandingPage.scss` atua como agregador e partials por secao (`HeroSection`, `ProductArtwork`, `PremiumFeatures`, `PricingSection`, `TrustAndFaq`, `LandingFooter`, etc.); os IDs publicos de ancora foram preservados.
+- Footers duplicados foram consolidados em `components/layout/shared/AppFooter`, com variantes para dashboard, landing e paginas legais.
+- A antiga home por capitulos (`BallGrid`, `Benefits`, `CTA`, `ChapterRail`, `Features`, `Header`, `Hero`, `HomeChapter`, `HomeStory`, `HowItWorks`, `Pricing` e dados exclusivos) foi removida apos analise de alcançabilidade.
+- Componentes UI orfaos (`Toast.tsx`, `badge.tsx`, `button.tsx`, `card.tsx`, `pricing-*`), `useScrollReveal.ts`, `auth.service.ts`, `lib/utils.ts` e partials globais sem consumidor foram removidos.
+- O namespace visual de botoes passou de `.btn` para `.app-button` / `.app-button--*`, eliminando vazamento global que afetava `MainCard`.
+- `.design-sync` foi atualizado para remover exports/previews inexistentes (`LeftSideBar`, `CategoryDrawer`), usar `tokens.css` como contrato central e manter compatibilidade para `ConfirmDialog`, `MainCard`, `DashboardMain`, `RightConfigSideBar`, `TopNav` e `Footer`.
+- O QA visual do redesign fica versionado em `npm run qa:frontend-refactor`; ele cobre rotas publicas, `/dashboard`, `/financeiro`, `/profile`, temas claro/escuro, breakpoints 320/375/414/768/1024/1440 e fluxo essencial de aposta manual.
+- A analise estatica de alcançabilidade sobre `src`, testes e `.design-sync` nao encontrou componentes orfaos restantes; o unico falso positivo aceitavel e `src/vite-env.d.ts`, que e arquivo ambiente do Vite.
 
 ## Estado remoto
 
@@ -94,14 +116,10 @@ src/
 
 ## Home pública
 
-- A rota `/` monta seis capítulos: `Hero`, `HowItWorks`, `Features`, `Benefits`, `Pricing` e o fechamento com `CTA` + `Footer`.
-- `HomeStory` organiza a Home em capítulos com scroll interno, navegação lateral e parallax seletivo; a estrutura foi separada em `HomeChapter`, `ChapterRail`, `useActiveHomeChapter` e tipos compartilhados.
-- Cada capítulo declara `variant`, `motion` e `showCaption` explicitamente; não há mais decisão de parallax baseada em `className.includes`.
-- Dados estáticos de `HowItWorks`, `Features`, `Benefits`, `Pricing` e `Footer` vivem em arquivos `data/*.data.ts`, deixando os componentes focados em renderização e interação.
-- `Hero` usa `public/media/lotojogo-hero-dark.png` como fundo escuro com loop cinematográfico em CSS (`pan/zoom` e varredura de luz), preservando `prefers-reduced-motion`; `HowItWorks` usa capítulo escuro com marquee contínuo de modalidades.
-- A seção `Pricing` usa palco e fundo escuros em vinho/plum, distintos do fundo roxo do capítulo de produto.
-- `chapter-closing` reúne CTA e footer em uma pilha responsiva; o footer usa superfície translúcida escura e deve permanecer integralmente dentro dos limites do capítulo.
-- IDs públicos das seções preservam links âncora do menu.
+- A rota `/` monta `HomePage`, que delega a landing para `components/layout/home/landing`.
+- A landing atual segue a linguagem de precisao operacional: nav, hero, produto, funcionalidades, fluxo, precos, FAQ, CTA e footer separados em componentes/partials SCSS proprios.
+- Os IDs publicos `#home`, `#features-section`, `#how-it-works-section`, `#pricing-section` e `#faq-section` foram preservados para ancoras e SEO.
+- Os componentes/dados da Home antiga por capitulos foram removidos; qualquer reintegracao deve partir de pedido explicito.
 - `prefers-reduced-motion` reduz ou remove animações nos componentes que oferecem essa regra.
 
 ### Tipografia e encaixe da Home
@@ -150,18 +168,18 @@ src/
 
 ## Dashboard principal
 
-- `DashboardPage` agora compoe `LeftSideBar`, `DashboardMain` e `RightConfigSideBar`, consumindo `useDashboardState`.
-- O planejamento aprovado em [[Dashboard Redesign]] direciona o proximo redesign para **Tactical Intelligence Dark** com enfase em dashboard operacional denso e fluxo guiado por etapas (`categoria -> estrategias -> revisao -> lote -> historico`).
-- O redesign planejado introduz `TopNav`, `CategoryDrawer`, `ProfilePage`, page transitions e footer global, mas deve preservar hooks/services existentes e a logica de geracao/gerenciamento.
-- Em 2026-05-25, a fase base do [[Dashboard Redesign]] instalou `framer-motion`, adicionou `TopNav`, `CategoryDrawer`, `Footer`, `ProfilePage`, transicoes de rota e aliases `/dashboard`, `/login`, `/register` e `/profile`, mantendo compatibilidade com `/dashboardPage`, `/loginPage` e `/registerPage`.
-- O `TopNav` substitui a `LeftSideBar` no fluxo principal da dashboard e usa `useAuthActions`; a selecao de categoria fica no `MainCard`.
+- `DashboardPage` agora compoe `DashboardLinearRail`, `DashboardControlCenter`, `DashboardMain`, `DashboardWorkQueue` e `RightConfigSideBar`, consumindo `useDashboardState`.
+- `DashboardLinearRail` e o chrome principal do fluxo operacional; `TopNav` permanece para superficies legadas/preview como `ProfilePage` e `.design-sync`.
+- `DashboardMain/MainCard` ficam montados na rota de producao para selecao e edicao de apostas manuais; a fila operacional resume rascunhos, estrategias, lotes gerados e historico.
+- `LeftSideBar` e `CategoryDrawer` foram removidos do frontend e do `.design-sync`.
+- Em 2026-05-25, a fase base do [[Dashboard Redesign]] instalou `framer-motion`, adicionou `TopNav`, `Footer`, `ProfilePage`, transicoes de rota e aliases `/dashboard`, `/login`, `/register` e `/profile`, mantendo compatibilidade com `/dashboardPage`, `/loginPage` e `/registerPage`.
 - O `TopNav` foi ajustado para o padrao visual mini-navbar: pill flutuante centralizada, logo abstrato de quatro pontos, links com hover vertical, botoes compactos e formato que muda de `rounded-full` para card arredondado quando menus/dropdowns estao abertos.
 - Em 2026-06-25, o `TopNav` da dashboard passou a seguir o menu transparente da Home: ocupa 100% da viewport, mostra apenas `PERFIL`, `CATEGORIA`, `TERMOS` e `SAIR`, e no mobile abre um painel transparente com altura de viewport.
 - Em 2026-06-25, o shell desktop da dashboard passou a alinhar `TopNav`, `dashboard-layout` e `app-footer` pelo mesmo gutter a partir de 1201px; `CategoryDrawer` removeu blur/backdrop-filter e usa animacao curta baseada em transform/opacity para evitar reflexo e custo alto em celulares.
 - Em 2026-07-02, a selecao de categoria saiu do `TopNav`; o canto direito foi reduzido para um pill com avatar por iniciais que alterna tema via `useTheme` e botao `Sair` que chama logout.
 - Em 2026-07-02, o `TopNav` passou a mostrar saudacao local (`Bom Dia`, `Boa Tarde` ou `Boa Noite`), nome do usuario, separador vertical e `Sair`; o avatar por iniciais continua alternando tema.
 - Em 2026-07-03, o `TopNav` ganhou uma engrenagem apos a saudacao; o tooltip abre por clique, fecha por Escape/clique externo e oferece as acoes reais `Tema` e `Perfil`.
-- Em 2026-08-13, a rota `/financeiro` ficou registrada em `App.tsx` como rota protegida para `features/financeiro/FinanceiroPage`; `TopNavSections` pode linkar para `/financeiro` somente enquanto essa rota existir.
+- Em 2026-09-08, a rota `/financeiro` deixou de montar uma pagina propria e redireciona para `/dashboard?aba=financeiro`; `TopNavSections` e a rail apontam para essa aba interna do dashboard.
 - A dashboard nao renderiza mais `RightProfileStatusBar`/`right-profile-area`; a `right-config-area` ocupa a altura lateral disponivel ao lado do painel principal.
 - `DashboardMain` nao renderiza mais `dashboard-header__brand` nem `dashboard-flow`; o `dashboard-ticker` assume o topo do painel principal.
 - O footer global foi adaptado para uma estrutura tipo 21st.dev: marca/logo, botoes sociais circulares, links principais, links legais e copyright/aviso de jogo responsavel.
@@ -186,6 +204,11 @@ src/
 - Em 2026-07-09, `right-config__tabs` passou a nomear a aba inicial como `Gerar`, adicionou a aba `Configurar` com icone de sliders e trocou `Gerenciar` para icone de ferramenta.
 - Em 2026-07-09, a aba `Gerar` passou a manter `strategy-creation-panel` e `strategies-scroll__toolbar` no topo, seguidos do `quick-generation-review`; cada linha do review abre a estrategia correspondente em `Configurar`. A aba `Configurar` mantem a toolbar no topo e o conteudo no `strategies-scroll`, com a acao `Gerar Apostas`.
 - Em 2026-07-27, `quick-generation-review` passou a paginar 4 itens por vez com paginação compacta no rodape, e cada row exibe badges preparados para `isLocked` e `fillStatus` futuros em `StrategyInstance`.
+- Em 2026-09-07, `ManualBetEditor` centralizou a edição de apostas manuais da aba `Gerar`: ele inicia sempre em inclusão; uma aposta salva é aberta primeiro em visualização e só muda para `Salvar alterações` pelo botão `Editar`. O limite de dezenas é configurável no cabeçalho, apostas com quantidades diferentes podem ser filtradas por badge, e a borda das dezenas selecionadas usa a cor de cada modalidade. A linha `Apostas manuais` de `quick-generation-review` abre esse editor; os metadados e `Voltar` ficam juntos no cabeçalho. O `GenerationCalendarPanel` usa a cor da modalidade para o dia ativo, informa ausência de concurso apenas nessa condição e requer `Selecionar dia` antes de listar concursos.
+- Em 2026-09-07, a edição do limite no `ManualBetEditor` passou a exigir confirmação explícita por Enter ou ícone de correto, sem salvar no blur. A camada operacional de `DashboardOperationalShell.scss` também é a fonte de verdade para neutralizar cores legadas dos painéis de templates e manter a confirmação de limpeza do review rápido compacta, sem altura mínima forçada.
+- Em 2026-09-07, enquanto o limite de dezenas está em edição, `generation-manual-card__meta-wrap` remove a engrenagem e deixa somente o campo numérico e a confirmação; não há cancelamento nesse estado. A mesma camada operacional trata `lote-list-item` como card de resumo compacto, com superfície, ações e custo visualmente separados.
+- Em 2026-09-07, `generation-manual-card__meta-wrap` adotou a mesma altura mínima de 31px de `generation-utility-back`, mantendo o cabeçalho do editor manual alinhado ao calendário.
+- Em 2026-09-07, o cabeçalho do `ManualBetEditor` passou a mostrar apenas o contador de dezenas. Selecionar uma aposta salva carrega uma cópia editável para inclusão; `Editar` abre atualização explícita com `Confirmar alterações` e `Cancelar`, e os botões de editar/apagar permanecem sem caixa visual. `lote-list__content` usa cards de lote compactos com custo e ações separados.
 - Em 2026-07-27, a paginação do `quick-generation-review` passou a calcular dinamicamente quantas rows cabem em desktop (`min-width: 1201px`) usando `ResizeObserver`, centralizando as rows quando sobra espaco e paginando o excedente sem depender de scroll interno.
 - Em 2026-07-27, a area de configuracao foi extraida para `ConfigTab`; as classes `strategies-config-*` foram substituidas por `config-tab*`, e `strategies-scroll__toolbar` deixou de existir na aba `Configurar`.
 - Em 2026-07-27, `quick-generation-review` ganhou acoes de header para abrir templates salvos e confirmar limpeza da categoria atual; o status de preenchimento agora e calculado por `validateStrategies([strategy], maxNumbers)`, com apenas `Preenchido`/`Nao preenchido`. O bloqueio de estrategia e estado local do rascunho em `StrategyInstance.isLocked`, impedindo edicao, otimizacao e duplicacao ate desbloquear.
@@ -240,13 +263,14 @@ Ver [[Auth]].
 
 ## Estilos
 
-O codigo atual usa SCSS global com imports por componente/pagina. Isso diverge da regra antiga "Use SCSS modules".
+O codigo atual usa tokens globais e SCSS BEM centralizado em `src/styles`, com arvore espelhada da arquitetura do codigo. Isso diverge da regra antiga "Use SCSS modules", mas e o padrao vigente do projeto.
 
 Padrao atual observado:
 
 - classes BEM-like (`lote-detail__body`, `strategy-section__header`);
+- `tokens.css` e `design.md` como contratos centrais de design;
 - tokens SCSS em `src/styles/tokens`;
-- imports diretos de `.scss`.
+- imports diretos de `.scss` a partir de `src/styles/components`, `src/styles/pages`, `src/styles/features` ou `src/styles/contexts`, preservando BEM por componente/pagina.
 
 ## Favicon e PWA
 

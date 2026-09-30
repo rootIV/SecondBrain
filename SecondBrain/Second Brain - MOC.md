@@ -3,7 +3,7 @@ tags:
   - second-brain
   - moc
   - knowledge-management
-updated: 2026-08-20
+updated: 2026-09-28
 ---
 
 # Second Brain - MOC
@@ -21,6 +21,10 @@ Mapa operacional do vault. Este arquivo e o ponto de entrada para agentes e manu
 ## Carreira
 
 - [[Job Search - TI]]: busca ativa de vagas em TI, candidaturas, curriculos por vaga e bloqueios operacionais.
+
+## Ambiente Codex
+
+- [[Codex Pet Nexo]]: instalacao, contrato v2, animacoes validadas e limite da integracao com consumo dinamico.
 
 ## Governanca
 

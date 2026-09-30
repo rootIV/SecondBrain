@@ -3,10 +3,72 @@ tags:
   - evocine
   - api
   - security
-updated: 2026-08-25
+updated: 2026-08-26
 ---
 
 # EvoCine - Decision Log
+
+## Diagnóstico de falha PIX Mercado Pago
+
+- Data: 2026-08-26
+- Incidente: produção retornou `PIX_PROVIDER_ERROR` ao gerar PIX no `POST /api/v1/checkout/pix`, visível no frontend como JSON de erro controlado.
+- Decisão: o endpoint de criação de PIX registra `HttpRequestException` com `OrderId` e responde `ApiErrorResponse` em `502`; o adapter `MercadoPagoClient` preserva na mensagem da exceção os detalhes estruturados retornados pelo SDK do Mercado Pago.
+- Correção: a criação do pagamento PIX passou a postar um payload JSON controlado em `/v1/payments`, mantendo Mercado Pago, `X-Idempotency-Key` e ausência de CPF, mas serializando `date_of_expiration` como string ISO 8601 com milissegundos e offset, por exemplo `2026-08-27T17:00:00.000-03:00`.
+- Caveat: o Mercado Pago documenta `date_of_expiration` em Payments API para pagamentos offline/cash entre 1 e 30 dias; usar 5 minutos fazia o pagamento ser cancelado cedo pelo provedor. A janela de 5 minutos permanece no checkout e no bloqueio local de nova cobrança, enquanto o provedor recebe 1 dia.
+- Operação: após rebuild/deploy, diagnosticar a causa real com `docker compose -f docker-compose.yml -f docker-compose.ec2.yml logs --tail=120 evocine-api` procurando por `Falha ao criar PIX no Mercado Pago`.
+- Verificação: teste de regressão cobre rejeição do provedor com detalhe em `date_of_expiration`; suíte .NET passou com 57 testes.
+
+## SEO e copy IPTV agressiva
+
+- Data: 2026-08-26
+- Decisão: por pedido explícito do usuário, título, metadados, Open Graph, Twitter, manifest, JSON-LD e copy da home passam a posicionar EvoCine como IPTV barato para Android, com linguagem comercial direta.
+- Copy: comunicar filmes, séries, canais ao vivo, TV aberta, esportes, futebol, pagamento único, acesso vitalício e preço de 38 R$; substituir textos de "streaming" por "IPTV" nas áreas comerciais da home e componentes.
+- SEO: ampliar `seoKeywords` com variações agressivas de IPTV barato, IPTV vitalício, IPTV Android, pagamento único, PIX, filmes, séries e canais ao vivo, evitando duplicatas.
+- Verificação: `npm.cmd run lint`, `npm.cmd test`, `npm.cmd run typecheck` e `npm.cmd run build` passaram no frontend.
+
+## Checkout PIX sem CPF e expiração curta
+
+- Data: 2026-08-26
+- Decisão: remover CPF do contrato público de criação de PIX; o checkout passa a solicitar somente nome, e-mail e aceite dos termos.
+- Mercado Pago: a API usa Payments v1, enviando e-mail, primeiro nome, sobrenome, `external_reference`, `X-Idempotency-Key` e `date_of_expiration` em 5 minutos, sem `payer.identification`; a criação do PIX usa payload JSON controlado para preservar o formato de data aceito pelo provedor.
+- UX: o frontend mantém QR Code e código Pix copia e cola em `localStorage` enquanto o PIX não expirar; após F5, o mesmo PIX pendente volta para a tela. Novo PIX só fica disponível quando o anterior expira, falha ou é rejeitado/cancelado.
+- Copy: a landing e FAQ agora tratam objeções sobre CPF, F5, confirmação Mercado Pago, compatibilidade Android, recuperação por e-mail e ausência de devolução após liberação digital.
+- Verificação: testes .NET, Vitest, ESLint, TypeScript, build Next e screenshots Playwright locais do checkout passaram.
+
+## Copy apelativa, etiqueta de preço e consentimento de cookies
+
+- Data: 2026-08-25
+- Decisão: por pedido explícito do usuário, a home voltou a usar copy comercial mais apelativa em metadados e hero, incluindo "IPTV barata", "pagamento único", "acesso vitalício" e preço de 38 R$.
+- UI: o preço foi removido de `hero__signal`, do primeiro item da faixa de confiança e da linha superior do cartão de checkout; o valor fica destacado em uma etiqueta visual verde sobre o checkout.
+- Experiência: adicionar barra flutuante de cookies com texto, logo atual e botões "Aceitar" e "Recusar"; aceitar grava consentimento total e recusar grava recusa total. O mockup estático da tela de download aprovado foi removido em ajuste posterior.
+- Verificação: Vitest, ESLint, TypeScript, build Next e screenshots Playwright locais da home foram executados.
+
+## Dois APKs liberados por pagamento
+
+- Data: 2026-08-25
+- Decisão: após pagamento aprovado, o checkout exibe dois botões de download: "Aplicativo padrão" para séries, filmes, TV ao vivo e calendário de jogos, e "Aplicativo alternativo" somente para TV ao vivo.
+- API: `PixCheckoutResponse` mantém `DownloadUrl` para compatibilidade e adiciona `Downloads`; `/api/v1/download/{token}` continua servindo o padrão, enquanto `/api/v1/download/{token}/padrao` e `/api/v1/download/{token}/alternativo` escolhem a variante.
+- Origem: `DownloadProxyService` escolhe origem por variante. O APK padrão usa `Download__SourceUrl` ou `Download__GoogleDriveFileId`; o alternativo usa `Download__AlternativeSourceUrl` ou `Download__AlternativeGoogleDriveFileId`, reutilizando `Download__GoogleDriveApiKey` quando `Download__AlternativeGoogleDriveApiKey` estiver vazio.
+- Recuperação: o e-mail de recuperação passa a listar os dois links temporários gerados com o mesmo token.
+- Verificação: 48 testes .NET com coverage OpenCover, 18 testes Vitest, TypeScript, ESLint, build Next e `docker compose -f docker-compose.yml -f docker-compose.ec2.yml config --quiet` passaram.
+
+## Download de APK via Google Drive API
+
+- Data: 2026-08-25
+- Decisão: manter o contrato público de download em `/api/v1/download/{token}` e permitir que a API use Google Drive como origem privada operacional por `Download__GoogleDriveFileId` e `Download__GoogleDriveApiKey`.
+- Motivo: evitar que o comprador receba link direto do Google Drive ou encontre telas intermediárias de confirmação no navegador; o backend chama `https://www.googleapis.com/drive/v3/files/{fileId}?alt=media` e entrega o stream somente depois de validar token, expiração e limite de uso.
+- Segurança: o file id e API key ficam em Docker secrets; `Download__SourceUrl` continua como fallback HTTPS. O serviço rejeita fallback HTTP e file ids com caracteres fora de letras, números, `_` e `-`.
+- Operação: o arquivo do Drive deve estar com acesso "Qualquer pessoa com o link" e a API key deve ter Drive API habilitada; para origem realmente privada por service account/OAuth, ainda seria necessário novo adapter de autenticação.
+- Verificação: `dotnet test .\ec-stream-tv-api\EvoCine.Api.Tests\EvoCine.Api.Tests.csproj --configuration Release` aprovou 47 testes e `docker compose -f docker-compose.yml -f docker-compose.ec2.yml config --quiet` passou.
+
+## SonarQube API e cobertura OpenCover
+
+- Data: 2026-08-25
+- Incidente: análise SonarQube do projeto `evocine` passou no Quality Gate, mas exibia 1 bug, security hotspots, code smells e 0.0% de coverage porque não havia relatório de cobertura importado.
+- Decisão: manter xUnit e adicionar Coverlet MSBuild no projeto de testes; `scripts/Invoke-SonarQube.ps1` agora executa build e testes dentro do ciclo `dotnet sonarscanner begin/end`, publicando `TestResults\sonarqube\coverage.opencover.xml` via `sonar.cs.opencover.reportsPaths`.
+- Refatoração: extrair endpoints para `Endpoints/CheckoutEndpoints.cs` e bootstrap/DI/pipeline para `Startup/EvoCineStartup.cs`, removendo a complexidade cognitiva do `Program.cs` top-level e agrupando dependências dos handlers com `[AsParameters]`.
+- Hardening: `MercadoPago__BaseUrl` passa a ser configuração HTTPS validada, SMTP de recuperação exige TLS, o seed admin usa regex com timeout e consultas de compra usam SQL estático parametrizado.
+- Verificação: `dotnet test .\ec-stream-tv-api\EvoCine.Api.Tests\EvoCine.Api.Tests.csproj --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="...\TestResults\sonarqube\coverage"` aprovou 44 testes sem warnings Sonar no build, com 42.61% de cobertura de linhas.
 
 ## Anti-slop visual, React Doctor e gates SonarQube
 
@@ -169,3 +231,11 @@ updated: 2026-08-25
 - Persistência: certificados e estado do Caddy ficam em volumes nomeados `caddy-data` e `caddy-config`; esses volumes não devem ser removidos como cache.
 - Operação: no EC2, usar `docker compose -f docker-compose.yml -f docker-compose.ec2.yml ...`; o comando com apenas `docker-compose.yml` não contém serviço `caddy`.
 - Requisitos externos: Security Group precisa liberar TCP 80/443 e o DNS de `evocine.tech`, `www.evocine.tech` e `api.evocine.tech` deve apontar para o Elastic IP.
+
+## Copy comercial com preço e compatibilidade Android
+
+- Data: 2026-08-25
+- Decisão: expor `38 R$` em pontos estratégicos da home, checkout e barra fixa, e reposicionar a oferta como compra única com acesso vitalício.
+- Dispositivos: a landing pode mencionar TV Box e outros dispositivos Android, mas sempre com ressalva de que o funcionamento depende do aparelho instalar e executar aplicativos Android como celular ou tablet.
+- FAQ: substituir a pergunta de liberação do download por aviso de não devolução após pagamento aprovado e downloads disponibilizados.
+- Rodapé: usar `Todos os direitos reservados` no rodapé da home e das páginas legais.

@@ -36,7 +36,7 @@ lotojogo/
 
 ## Controle de versao
 
-- A pasta pai `C:\Users\root4\OneDrive\Documents\Projetcts\Lotojogo` organiza os projetos, mas nao e o repositorio Git principal.
+- A pasta pai `C:\Projetcts\Lotojogo` organiza os projetos, mas nao e o repositorio Git principal.
 - Existem repositorios Git separados dentro de `lotojogo` e `lotojogo-api`.
 - Ao rodar `git status`, `git diff`, commits ou branches, usar o diretorio do projeto especifico.
 - Para reduzir contexto, seguir [[Agent Context Rules]] antes de pesquisar/editar arquivos.

@@ -8,9 +8,9 @@ Reduzir consumo de contexto e risco de edicoes fora de escopo. O agente deve bus
 
 ## Regra base
 
-- O vault Obsidian correto do projeto e `C:\Users\root4\OneDrive\Documents\Projetcts\SecondBrain\SecondBrain\Projects\LotoJogo`.
+- O vault Obsidian correto do projeto e `C:\Projetcts\SecondBrain\SecondBrain\Projects\LotoJogo`.
 - Atualizar notas do projeto somente nesse caminho.
-- O workspace `C:\Users\root4\OneDrive\Documents\Projetcts\Lotojogo` coordena dois repositorios Git separados: frontend `lotojogo` e backend `lotojogo-api`.
+- O workspace `C:\Projetcts\Lotojogo` coordena dois repositorios Git separados: frontend `lotojogo` e backend `lotojogo-api`.
 - Prefixar comandos suportados com `rtk` para reduzir saida e consumo de contexto.
 - Usar comando nativo somente quando o RTK nao oferecer equivalente, quando a saida bruta exata for necessaria ou quando o wrapper falhar.
 - Usar `rtk proxy <comando>` para comandos sem filtro que ainda devem ser rastreados.
@@ -19,7 +19,7 @@ Reduzir consumo de contexto e risco de edicoes fora de escopo. O agente deve bus
 - No PowerShell, definir `$env:PYTHONIOENCODING='utf-8'` antes de consultas Graphify para evitar erro de Unicode.
 - O Graphify usa o Python bundled do Codex em `C:\Users\root4\.cache\codex-runtimes\codex-primary-runtime\dependencies\python`.
 - Diagnostico rapido: `Get-Command graphify`, `graphify explain "Hero" --graph .\graphify-out\graph.json` e `python.exe -c "import graphify"` usando o caminho bundled acima.
-- O grafo Graphify atual existe no frontend em `C:\Users\root4\OneDrive\Documents\Projetcts\Lotojogo\lotojogo\graphify-out\graph.json`.
+- O grafo Graphify atual existe no frontend em `C:\Projetcts\Lotojogo\lotojogo\graphify-out\graph.json`.
 - O backend `lotojogo-api` ainda nao possui `graphify-out\graph.json`; para backend, usar Obsidian, `rg` e leitura escopada ate um grafo ser gerado.
 - Se o CLI Graphify nao estiver disponivel, consultar diretamente `graphify-out/graph.json` com o runtime Node.js ou Python disponivel antes de fazer buscas amplas.
 - Em toda tarefa, consultar as notas Obsidian relevantes antes de exploracao ampla para recuperar decisoes, caveats e conhecimento geral duravel.

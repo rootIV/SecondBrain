@@ -59,6 +59,7 @@ Relacionado: [[LotoJogo - MOC]], [[Architecture]], [[Auth]], [[Repositories]], [
 - `dupla_sena` usa `draw_order` para guardar o primeiro e o segundo sorteio do mesmo concurso.
 - O seed `Data/Seed/lottery-draws.seed.json` e importado de forma idempotente no startup apos migrations.
 - `LotteryGameCatalog` normaliza aliases legados do seed (`loto_mania`, `time_mania`, `dia_sorte`) e `LotteryDrawRepository` consulta aliases para que estatisticas historicas enxerguem bancos antigos e novos.
+- `GET /LotteryDraws/latest` retorna o ultimo sorteio por modalidade, com filtro opcional `category`, para alimentar resumos operacionais do frontend sem expor o fluxo administrativo.
 - `GET /Admin/lottery-draws/coverage` audita cobertura por modalidade e mostra lacunas de concurso/draw_order para orientar importacao oficial sem rodar rede no startup.
 - `POST /Admin/lottery-draws/import-caixa` suporta todas as modalidades do catalogo via `OfficialCaixa:ContestUrlTemplate`, reutiliza o parser dos providers e limita a 500 concursos por chamada.
 - `StrategyOptimizerService` consulta sorteios recentes para sugerir configuracoes de estrategias por faixas estatisticas.
@@ -98,3 +99,9 @@ Relacionado: [[LotoJogo - MOC]], [[Architecture]], [[Auth]], [[Repositories]], [
 ## Observacao arquitetural
 
 A direcao esta correta para Clean Architecture, mas ainda e uma Clean Architecture pragmatica em projeto unico. Se o projeto crescer, separar `Domain`, `Application`, `Infrastructure` e `Api` em projetos distintos deve ser o proximo passo.
+
+## Consulta de concurso por data
+
+- `GET /LotteryContests` aceita `date=YYYY-MM-DD` somente junto de `category`.
+- Sem `date`, a consulta por categoria continua retornando apenas concursos `Scheduled`, preservando o seletor de geração.
+- Com `date`, a API filtra pela data programada e pode retornar concurso `Drawn`; esse contrato existe para localizar o escopo de apostas manuais históricas, não para liberar geração automática em concurso apurado.
