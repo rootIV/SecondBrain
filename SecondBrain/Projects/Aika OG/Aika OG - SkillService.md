@@ -192,3 +192,7 @@ Efeitos especiais sem infraestrutura atual continuam no-op documentado ate as me
 - `PartyDamageService` gerencia link da Uniao Divina, redirect de 30% com cap acumulado 2680, bonus de resistencia e remocao de link invalido.
 - `ControlEffectService` separa stun, silence e root. Silence bloqueia skills, nao ataque basico; root bloqueia movimento, nao ataque se ja estiver em alcance.
 - `BuffLifecycleService` processa tick do El Aegis a cada 2s e limpa links invalidos de Uniao Divina.
+
+## Bloqueio de arma — 2026-10-09
+
+- [[Aika OG - NPC Venda e Bloqueio de Arma 2026-10-09]]: família 33–48, Index 19 e efeito 221=1 corrigida localmente de Attack/Enemy/Target para Buff/Self/Caster. Implementada uma carga de bloqueio por cast, expiração de 60 segundos, consumo/persistência e tipo Block no ataque de mob. SQL ativo ainda requer migração e reinício; regra de uma carga precisa confirmação no gameplay.

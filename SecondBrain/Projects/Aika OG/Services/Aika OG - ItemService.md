@@ -103,3 +103,7 @@ Em 2026-07-03 entrou o primeiro corte do sistema de inventario/equipamento basea
 - `ItemList.bin` e lido a partir do offset `0`; o arquivo tem sobra no final, nao cabecalho inicial de 4 bytes.
 - O layout do packet `0xF0E` foi coberto por teste de caracterizacao antes da refatoracao.
 - O primeiro corte nao implementa storage, guild chest, pran, cash, uso de item, buff, refinamento ou drops.
+
+## Preços nativos e venda ao NPC — 2026-10-09
+
+- [[Aika OG - NPC Venda e Bloqueio de Arma 2026-10-09]] corrige a leitura dos preços ItemList: honra 284, medalha 288, ouro 292, venda 296. Misteim 2545 tem venda-base 11.850; visitante 15% e durabilidade completa recebe 10.073 após truncar a dedução. Source/editor corrigidos localmente; SQL e processo online anteriores ainda não atualizados.

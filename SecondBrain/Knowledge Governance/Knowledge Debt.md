@@ -116,6 +116,12 @@ Registro de lacunas, duplicacoes e inconsistencias da base de conhecimento.
 - Resolvido no upgrade BinEditor: checksum SetItem comprovado escalar/SIMD/reference (64–215); editor recalcula também PI e SetItem. Ver [[Aika OG - BinEditor Sessoes e Seguranca]].
 - Aberto no upgrade: associação automática de ID de ícone com atlas/célula, especialmente skill offset 0, ainda inferida. Pixels JIT estão verificados; não extrapolar isso para semântica de ícones. Referências cruzadas completas de quests/crafting/skills/NPCs ainda não estabelecidas.
 
+## Aika Studio Web — 2026-10-09
+
+- Referência: [[Aika OG - Aika Studio Web]]. Auditoria estática registra 153 entradas ausentes, três construtores sem fluxo e `0x306` com handler vazio; validar por captura antes de implementar/remapear protocolo.
+- Aberto: perfil 10 em conta existente fora do enum 0–5 da source. Preservado e sinalizado; resolução operacional depende do papel pretendido para a conta.
+- Aberto: gravações de bins e SQL são operações separadas; não há sincronização automática. Ícones/raridade mantêm as inferências já registradas na pesquisa BinEditor.
+
 ## AikaMasterTool GM — 2026-10-09
 
 - Referência: [[Aika OG - AikaMasterTool Central e GM]]. Manutenção é confirmada pelo operador, sem prova de ausência de sessões remotas. Uma administração em tempo real exige um contrato autenticado com o GameServer e aplicação via serviços de domínio.
@@ -126,5 +132,13 @@ Registro de lacunas, duplicacoes e inconsistencias da base de conhecimento.
 - Resolvido: [[Aika OG - Auditoria Servidor Client 2026-10-09]]. ExpList e SetItem corrigidos com 8 regressões. Catálogo MySQL ativo comparado e sincronizado após autorização expressa: zero diferenças entre client/Data/banco para itens e skills, EXP101 e conjuntos/comportamentos alinhados. Backup SQL/Data e verificação preservados; bootstrap confirmou database.
 - Resolvido: 83 vínculos de conjuntos e 17 drops sem referência válida removidos de Data/banco; 352 testes aprovados na solution, 1 ignorado, runner legado exit0. Execuções finais usam banco temporário isolado.
 - Aberto: 159 lojas observadas vazias, sem StoreData externo. Preencher exige fonte válida. Semântica do DWORD/bloco secundário de EXP, limite de nível e associação completa de conjuntos novos ainda não comprovadas; não extrapolar paridade das tabelas para essas regras.
-- Aberto: confirmar comportamento em gameplay com logs/captura. Não há evidência de sessão completa nesta auditoria. Setup x32dbg/x64dbg + Automate/MCP posteriormente instalado e testado com processos do Windows; attach ao Aika e compatibilidade de gameplay permanecem pendentes. Ver [[Aika OG - Depuracao Realtime x64dbg]].
+- Verificado em captura: ClasseRuim moveu, trocou item de slot e retornou, atacou com animação/dano e reentrou no mapa, conforme operador e 1.098 registros no client. 118 pares de saída completos passaram em payload/checksum; sem prova de compatibilidade completa. Ver [[Aika OG - Depuracao Realtime x64dbg]].
+- Aberto: duas recepções de mobs retornaram status 4 por seed consecutiva repetida (`0x50` e `0x17`), com payloads diferentes. Source escolhe seed aleatória antes da fila, sem garantia por conexão. Corrigir no fluxo final por conexão respeitando concorrência/broadcast e validar nova sessão; nenhuma correção de protocolo aplicada nesta captura.
+- Aberto: login inicial/autenticação e sistemas/classes restantes não capturados; `0x925` de 6380 bytes limitado aos primeiros 4096. Não extrapolar movimento/inventário/combate para quests, crafting, lojas, trade ou PvP.
 - Resolvido: [[Aika OG - WorldDataService]] atualizada para o bootstrap que prioriza MySQL. Aberto: MOC principal e Knowledge Operating Model ainda declaram raízes legadas do vault; a raiz usada e verificada neste trabalho é `C:\Projetcts\SecondBrain`, com conteúdo em `SecondBrain/`. Não houve reorganização de notas.
+
+## Venda ao NPC e Bloqueio de arma — 2026-10-09
+
+- [[Aika OG - NPC Venda e Bloqueio de Arma 2026-10-09]]: paridade anterior client/Data/banco usava parser com preços deslocados em quatro bytes; não demonstrava semântica correta dos preços. Corrigidos parser/editor e cálculo local, com 378 testes aprovados e migração/rollback validados em clone.
+- Resolvido: migração específica aplicada em aikaria, 16.471 preços sem divergências e 16 comportamentos confirmados; servidor/Studio recompilados. Aberto: medir venda/buff no gameplay após ativação.
+- Aberto: delta exato da venda informada acima de 12 mil não capturado. Regra de uma carga do efeito 221 implementada conforme descrição/dados, sem validação operacional ou servidor oficial; taxas especiais e stacks realtime não cobertos.

@@ -32,6 +32,8 @@ Servidor open source otimizado para Aika, dividido em `GameServer`, `TokenServer
 - [[Aika OG - Depuracao Realtime x64dbg]]
 - [[Aika OG - BinEditor Sessoes e Seguranca]]
 - [[Aika OG - AikaMasterTool Central e GM]]
+- [[Aika OG - Aika Studio Web]]
+- [[Aika OG - Criacao Titulos Chat e Studio 2026-10-09]]
 - [[Aika OG Development Skill]]
 
 ## Regras sensiveis
@@ -45,3 +47,7 @@ Servidor open source otimizado para Aika, dividido em `GameServer`, `TokenServer
 - Projeto atual verificado: `C:\Projetcts\aika-og` (caminho legado: `C:\Users\Vitor\Documents\Projects\aika_og`).
 - Solucao: `AikaOG.sln`
 - Build de verificacao: `dotnet build AikaOG.sln`
+
+## Venda ao NPC e Bloqueio de arma — 2026-10-09
+
+- [[Aika OG - NPC Venda e Bloqueio de Arma 2026-10-09]]: preços nativos corrigidos e buff com carga implementado localmente. SQL/rollback verificados em clone e 378 testes passaram; ativação e gameplay pós-correção pendentes.
