@@ -8,6 +8,15 @@ updated: 2026-08-26
 
 # Maintenance Log
 
+## 2026-10-03 - MCPs 21st e shadcn
+
+- Registrados globalmente em `C:\Users\root4\.codex\config.toml`: `21st`, HTTP em `https://21st.dev/api/mcp`, autenticado pelo OAuth detectado pelo Codex; `shadcn`, stdio via `npx -y shadcn@latest mcp`.
+- O repositorio `21st-dev/magic-mcp` informa que Magic foi substituido pelo 21st; foi usada a conexao HTTP atual. OAuth concluiu com sucesso, sem salvar chave em texto no config ou neste vault.
+- Backup anterior: `C:\Users\root4\.codex\config.toml.before-ui-mcp-20261003-181039.bak`. Comparacao TOML confirmou igualdade de todas as configuracoes anteriores apos excluir somente os dois novos servidores; provider, modelos e integracoes preservados.
+- Verificacao real via `codex app-server`/`mcpServerStatus/list`: 21st com 34 ferramentas e shadcn com 7. O shadcn tambem respondeu a `initialize`, `tools/list` e `get_project_registries`; CLI 4.21.1.
+- Reiniciar Codex para carregar o novo catalogo nesta sessao. MCP shadcn nao implica migrar a aplicacao para Tailwind nem instalar componentes no projeto; [[Dashboard Redesign]] manteve React, SCSS e Framer Motion existentes.
+- Fontes: [21st/Magic](https://github.com/21st-dev/magic-mcp), [shadcn MCP](https://ui.shadcn.com/docs/mcp), [Codex MCP](https://learn.chatgpt.com/docs/extend/mcp?surface=cli).
+
 ## 2026-08-26 - Manutencao de skills e configuracao Codex
 
 ### Problema
@@ -254,3 +263,9 @@ Serena abria varias janelas/abas ao iniciar como MCP no Codex.
 - `codex plugin list` mostrou `ponytail@ponytail` e `agent-skills@agent-skills` como `installed, enabled`.
 - `config.toml.current`, inventario de plugins e `RESTORE.md` do backup registram os dois plugins e comandos de reinstalacao.
 - Varredura do RAR nao encontrou `auth.json`, SQLite, sessoes, caches, plugin cache ou secrets.
+
+## 2026-10-09 - Instalação do Strix para auditoria autorizada
+
+- Instalado Strix 1.7.0 para Windows com SHA-256 conferido; preservadas as configurações do Codex e as entradas anteriores do PATH.
+- Autenticação própria com ChatGPT concluída. O exemplo `gpt-5.4` da documentação foi rejeitado; modelo `gpt-6.1-sol` confirmado pelo serviço e análise deep iniciada.
+- Registrados contrato de escopo e limitações em [[Strix - Instalacao Windows e escopo de auditoria]]. O início não representa uma auditoria concluída.

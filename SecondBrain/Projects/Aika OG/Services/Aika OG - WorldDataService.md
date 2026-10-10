@@ -5,18 +5,18 @@ tags:
   - world-data
   - mob
   - npc
-updated: 2026-07-06
+updated: 2026-10-09
 ---
 
 # Aika OG - WorldDataService
 
 Relacionado: [[Aika OG - MobService]], [[Aika OG - NPC Spawn]]
 
-`WorldDataService` publica o estado carregado de dados de mundo vindos da pasta `Data`. Resolucao de caminho e parsing foram separados.
+`WorldDataService` publica o estado de mundo aplicado pelo catálogo. `GameCatalogBootstrapService` prioriza o MySQL não vazio; os arquivos de `Data` são fallback. Resolucao de caminho e parsing foram separados. Ver [[Aika OG - Auditoria Servidor Client 2026-10-09]].
 
 ## Origem Delphi
 
-- Caminho principal atual: `C:\Users\Vitor\Documents\Projects\aika_og\Data`.
+- Checkout/Data verificados em 2026-10-09: `C:\Projetcts\aika-og\Data`. Caminhos abaixo são referências históricas da implementação Delphi.
 - Fallback historico Delphi: `C:\Users\Vitor\Documents\Projects\aika\Aika TheMu New\Bin\Data`.
 - NPCs: `Data\NPCs\*.npc`, estrutura Delphi `TNPCFile`.
 - Mobs comuns: `Data\Mobs\MonsterListCSV.csv` para instancias/posicoes e `Data\Mobs\AllMobsInfo.csv` para dados estaticos do template.
@@ -24,7 +24,7 @@ Relacionado: [[Aika OG - MobService]], [[Aika OG - NPC Spawn]]
 
 ## Comportamento C#
 
-- `Program.cs` chama `WorldDataService.Load()` antes de iniciar os sockets.
+- `Program.cs` chama `GameCatalogBootstrapService.LoadAsync()` antes de iniciar os sockets. O catálogo é aplicado aos serviços; um MySQL não vazio tem precedência sobre os arquivos.
 - `WorldDataPathResolver` resolve caminho:
   - caminho explicito recebido pelo loader.
   - `AIKA_WORLD_DATA`.
@@ -33,7 +33,7 @@ Relacionado: [[Aika OG - MobService]], [[Aika OG - NPC Spawn]]
   - `Data` na raiz da solution C#.
   - `GameServer\Data` no projeto.
   - fallback para o caminho Delphi local.
-- `Program.cs` tambem chama `ItemTemplateService.Load(WorldDataService.LoadedDataPath)` para carregar `ItemList.bin` da mesma raiz de dados.
+- `CatalogImportService.LoadFromFiles` carrega ItemList e os demais catálogos da raiz resolvida quando o bootstrap usa arquivos. Alterar Data isoladamente não atualiza um catálogo MySQL já importado.
 - `NpcFileParser` le `Data\NPCs\*.npc`, extrai id pelo nome `[2048] Nome.npc` e carrega `TNPCHeader.Options[0..9]` do offset `36..45`.
 - `NpcOptionTextService` carrega `Data\NPCOptionsText.bin` ou `Data\NPCs\NPCOptionsText.bin` para nomear as opcoes enviadas em `0x112`.
 - `MobCsvParser` le `AllMobsInfo.csv` e `MonsterListCSV.csv`, mantendo templates e instancias separados.

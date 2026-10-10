@@ -855,3 +855,20 @@ Tradeoff:
 
 - Abertura inicial de Gerenciar/Admin/Configurar pode carregar um chunk adicional na primeira visita da aba, mas a primeira tela do dashboard fica muito menor e com menos concorrencia de rede.
 
+## 2026-10-02 - Hierarquia de planos e cota diária centralizada
+
+Decisão atual no código:
+
+- Os planos têm ordem explícita `Free=0`, `Plus=1`, `Pro=2`, `Bolao=3`; upgrades só avançam nessa ordem.
+- A cota diária é validada no backend dentro do fluxo de geração, com apostas manuais e automáticas na mesma contagem e virada em `America/Sao_Paulo`.
+- Requisições concorrentes do mesmo usuário são serializadas antes da contagem e persistência; o lote inteiro falha quando ultrapassa a cota.
+- Permissões de estratégia, otimização, estatísticas e Financeiro são expostas no entitlement, mas também bloqueadas nos endpoints correspondentes.
+
+Motivo:
+
+- Evitar divergência entre interface e API e impedir que concorrência ou chamadas diretas contornem limites comerciais.
+
+Tradeoff:
+
+- A trava por usuário é local ao processo. Se a API operar com múltiplas instâncias, migrar a coordenação para uma trava distribuída ou garantia equivalente no banco.
+

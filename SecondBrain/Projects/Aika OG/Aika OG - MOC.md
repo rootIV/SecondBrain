@@ -3,7 +3,7 @@ tags:
   - project/aika-og
   - architecture
   - game-server
-updated: 2026-07-03
+updated: 2026-10-09
 ---
 
 # Aika OG - MOC
@@ -27,6 +27,11 @@ Servidor open source otimizado para Aika, dividido em `GameServer`, `TokenServer
 - [[Aika OG - SessionManager]]
 - [[Aika OG - PacketDispatcher e Protocolo]]
 - [[Aika OG - AIKA.exe Win32 Dialogs]]
+- [[Aika OG - Cliente OG 2026-10-09]]
+- [[Aika OG - Auditoria Servidor Client 2026-10-09]]
+- [[Aika OG - Depuracao Realtime x64dbg]]
+- [[Aika OG - BinEditor Sessoes e Seguranca]]
+- [[Aika OG - AikaMasterTool Central e GM]]
 - [[Aika OG Development Skill]]
 
 ## Regras sensiveis
@@ -37,6 +42,6 @@ Servidor open source otimizado para Aika, dividido em `GameServer`, `TokenServer
 
 ## Codigo fonte
 
-- Projeto: `C:\Users\Vitor\Documents\Projects\aika_og`
+- Projeto atual verificado: `C:\Projetcts\aika-og` (caminho legado: `C:\Users\Vitor\Documents\Projects\aika_og`).
 - Solucao: `AikaOG.sln`
 - Build de verificacao: `dotnet build AikaOG.sln`

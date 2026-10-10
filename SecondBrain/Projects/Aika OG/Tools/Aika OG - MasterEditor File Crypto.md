@@ -58,3 +58,18 @@ O projeto `AikaFileCrypto` em `C:\Users\Vitor\Documents\Projects\aika_og` implem
 - a escolha de chave nao e opcao publica: `SkillData*` usa a chave de skill internamente, `Title.bin` copia sem crypto, e os demais `.bin` usam a chave padrao de item.
 - decrypt remove automaticamente o cabecalho `BR00022I 00 00 00 00` quando presente;
 - encrypt adiciona esse cabecalho somente quando usado com `--header`.
+
+## Cliente OG observado em 2026-10-09
+
+- Workspace atual: `C:\Projetcts\aika-og`; cliente lido: `D:\aika\Aika OG`.
+- `ItemList4.bin`: envelope `BR00022I` + quatro zeros, 31.000 slots de 464 bytes e quatro bytes finais no payload.
+- `SkillData4.bin`: envelope **`BR00010S`** + quatro zeros, 12.000 slots de 720 bytes e quatro bytes finais. A chave Skill existente descriptografa esse payload quando o envelope de 12 bytes é removido explicitamente.
+- `T_SkillData` do Delphi antigo soma 716 bytes. Não usar esse tamanho como passo neste cliente; os quatro bytes adicionais do registro são preservados.
+- `AikaBinEditor.exe` é publicado na raiz como Windows x64 independente, reaproveitando os três arquivos de crypto por link de compilação. Mantém o envelope original de cada documento; não modifica a API existente do utilitário `AikaFileCrypto`.
+- Salvamento sem edição é idêntico byte a byte. Edição, gravação e reabertura foram verificadas em cópias temporárias de itens/habilidades; 58 checks do runner `AikaBinEditor.Tests`, janela e grid exercitados com arquivos reais.
+- O footer de quatro bytes fica fora da criptografia. Checksum comprovado por execução x86 escalar/SIMD: soma de `byte[slot,offset] + slot*offset`, módulo 2^32. Item cobre 192–463; Skill 72–719; PI 320–375. O editor recalcula Item/Skill quando há edição e preserva o footer em round trip sem alterações. A aceitação em sessão real permanece pendente.
+- Nesta hash de cliente, as comparações dos três checksums são seguidas por JMP incondicional; não extrapolar para outro build ou para todas as verificações. Valores armazenados divergem do cálculo nativo.
+- Extrações adicionais de 15 tabelas e recursos estão documentadas em [[Aika OG - Cliente OG 2026-10-09]]. A UI nomeia campos somente de Item/Skill; parsers adicionais ficam separados.
+- Documentação completa: `C:\Projetcts\aika-og\RELATORIO.md`; build: `tools/Build-AikaBinEditor.ps1`.
+
+Relacionado: [[Aika OG - MOC]].
