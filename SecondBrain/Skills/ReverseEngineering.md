@@ -18,6 +18,10 @@ Reverse engineering deve ser usado para interoperabilidade, documentacao de form
 
 - Aika OG: preservar `GameProtocol`, `EncDec`, keys, opcodes, packet sizes e layouts. Ver [[Aika OG - MOC]].
 
+## Nomes no Ghidra e x64dbg
+
+Aplicar [[Preferencias de Engenharia e Reverse Engineering]]: renomear funcoes no Ghidra e atribuir labels no x64dbg quando sustentados por evidencia; salvar no projeto/database e verificar persistencia quando possivel. Documentar binario/build, modulo+RVA, nomes anterior/novo, evidencia e confianca. Nomes inferidos devem ser marcados como provisorios; preservar simbolos originais significativos.
+
 ## Template minimo de descoberta
 
 - Entrada observada:

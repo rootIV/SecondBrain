@@ -2,10 +2,22 @@
 tags:
   - project/aika-og
   - architecture
-updated: 2026-07-06
+updated: 2026-10-20
 ---
 
 # Aika OG - Arquitetura Atual
+
+## Separação de autenticação e inicialização — 2026-10-20
+
+Refatoração local documentada em `C:\Projetcts\aika-og\docs\design\SERVER-RESPONSIBILITIES-REFACTOR.md`. `AccountAuthenticationService` contém as regras de credenciais/status; `IAccountRepository` é o contrato da aplicação e `AccountRepository` uma implementação MySQL por instância. Os handlers estáticos recebem o serviço montado em `ServerComposition.Authentication`; o restante do dispatch/gameplay mantém o padrão existente.
+
+`Program` passa a possuir um `GameServerRuntime` por `await using`. A composição declara preparação de esquema/catálogos, início dos serviços e todas as etapas de desligamento. O runtime agrega falhas de cleanup e permite liberar serviços após início síncrono parcial. `GameDatabaseBootstrap` verifica esquema; não instala tabelas implicitamente. O accept/recycling TCP e o encerramento por sinal não foram reescritos.
+
+No TokenServer, controllers usam `AuthenticationService` por DI, com `IAccountTokenRepository` e `MySqlAccountTokenRepository`. A fachada `AuthHandlers` e o adaptador `DatabaseHandler` continuam para compatibilidade. Ver [[Aika OG - Sistema de Auth]]. Protocolo, criptografia, SQL de autenticação e códigos de retorno preservados; sem implantação.
+
+Verificação local: 19 testes do TokenServer e 37 de autenticação/runtime do GameServer aprovados; build da solução com zero erros. Suíte completa: 1.371 aprovados/1 falha/10 condicionais. A falha Cubo/6344 foi reproduzida sem a refatoração e o grupo passa isoladamente; consultar [[Knowledge Debt]]. MySQL isolado e cliente real não foram executados.
+
+Atualização de persistência 2026-10-11: [[Aika OG - Banco de Dados v1 2026-10-11]]. A instalação é explícita; conexões dos servidores não criam banco/tabelas. Fonte atual: Shared/Data/DatabaseSchema.cs e Database/README.md.
 
 Relacionado: [[Aika OG - MOC]], [[Aika OG - PacketDispatcher e Protocolo]], [[Aika OG - Sistema de Auth]]
 
@@ -95,10 +107,12 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["Program.Main"] --> B["ServerConfiguration"]
-    B --> C["NationServerManager.StartServers"]
-    C --> D["TcpGameServer"]
-    D --> E["GameProtocol"]
+    A["Program.Main"] --> B["ServerConfiguration e ServerComposition"]
+    B --> R["GameServerRuntime"]
+    R --> P["GameDatabaseBootstrap e catálogos"]
+    P --> S["Autosave, regeneração e AI"]
+    S --> C["NationServerManager.StartServers"]
+    C --> D["TcpGameServer e GameProtocol"]
 ```
 
 ## Pontos de atencao
@@ -108,6 +122,7 @@ flowchart TD
 - `PacketPool.Return` reseta streams e limita retencao; factories devem chamar `GetBytes()` antes de devolver o stream ao pool.
 - `PacketFactory.FinalizePacket` escreve tamanho nos dois primeiros bytes.
 - `Session.SendPacket` usa fila outbound por pacote e apenas um `SendAsync` ativo por sessao; `RingBuffer` nao participa mais do envio de sessao.
+- [[Aika OG - Rede Heartbeat e Desconexao 2026-11-03]]: acumulador linear implementa framing, leitura/consumer e envio são aguardados/limitados por sessão, heartbeat opt-in mede RTT e patch do cliente retorna ao login com aviso. Homologação de gameplay/ativação separada dos testes. [[Aika OG - Buffers Pools e Framing TCP 2026-11-02]] conserva a investigação histórica; RingBuffer/ObjectPool não foram ativados.
 - `SessionManager` mantem indice O(1) de character id para sessao; broadcasts devem usar `VisibilityBroadcastService`.
 - AI/visibilidade/broadcast nao devem voltar a fazer scans globais de sessoes/mobs/NPCs nos loops quentes.
-- Repositorios ainda fazem SQL direto; uma evolucao futura seria introduzir interfaces em `Application` e implementacoes em `Infrastructure`.
+- Repositórios mantêm SQL em `Infrastructure`. Autenticação já depende de interfaces em `Application`; os demais serviços de gameplay ainda usam o padrão estático atual.

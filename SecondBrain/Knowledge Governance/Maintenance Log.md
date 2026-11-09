@@ -3,10 +3,25 @@ tags:
   - second-brain
   - maintenance
   - log
-updated: 2026-08-26
+updated: 2026-10-14
 ---
 
 # Maintenance Log
+
+## 2026-10-17 - Mensagens e contrato de login
+
+- [[Aika OG - Patch e Contrato Login 2026-10-17]]: patch reversível aplicado, oito testes offline, sete símbolos adicionais persistidos e plano de melhorias ligado ao TokenServer/GameServer. Backups/hashes conferidos; sem alteração de runtime servidor ou banco. UI real e contratos divergentes em [[Knowledge Debt]].
+
+## 2026-10-17 - REA e client OG
+
+- [[Aika OG - REA e Protocolo Nativo 2026-10-17]]: instalação restrita ao Codex, config preservada e MCP validado; projeto Ghidra recuperado, sete nomes salvos e conferidos ao reabrir, 2.568 checks nativos e triagem histórica de packets. Limites/contradições registrados em [[Knowledge Debt]]; sem alteração no protocolo ou executável.
+
+## 2026-10-14 - Referencias e nomes de reverse engineering
+
+- Registradas as preferencias explicitas do usuario em [[Preferencias de Engenharia e Reverse Engineering]], com links no MOC principal, na nota de referencias Aika e em [[ReverseEngineering]].
+- Referencias devem ser avaliadas pelo merito tecnico; melhorar corretude, algoritmos, desempenho, seguranca e manutencao quando houver justificativa, preservando contratos e verificando o resultado.
+- Renomear funcoes/labels no Ghidra/x64dbg quando houver evidencia, salvar quando possivel e documentar modulo+RVA/build e confianca. Hipoteses ficam marcadas como provisorias.
+- Nenhuma funcao renomeada nesta interacao: nao havia sessao ativa do x64dbg, e nenhum projeto Ghidra foi inspecionado.
 
 ## 2026-10-03 - MCPs 21st e shadcn
 
@@ -263,6 +278,15 @@ Serena abria varias janelas/abas ao iniciar como MCP no Codex.
 - `codex plugin list` mostrou `ponytail@ponytail` e `agent-skills@agent-skills` como `installed, enabled`.
 - `config.toml.current`, inventario de plugins e `RESTORE.md` do backup registram os dois plugins e comandos de reinstalacao.
 - Varredura do RAR nao encontrou `auth.json`, SQLite, sessoes, caches, plugin cache ou secrets.
+
+## 2026-10-18 - Catálogo e símbolos Aika OG
+
+- [[Aika OG - Opcodes e Simbolos 2026-10-18]] conecta auditoria245/245,aliases/semântica,11renomesC#,27símbolosGhidra eStudioverificado.0x121identificadocomocerco;0xCCCCaindadesconhecido;0x16Ecorrigido252wirevs372interno.13testesPython+41GS passaram,frontend/APIbuild+lint eUIrealverificadossemDB/gameplay. Inventário9933funções eoriginaisrecuperadosvalidados;limites/restore/grafo em[[Knowledge Debt]].
+
+## 2026-10-17 - Login e packets Aika OG
+
+- [[Aika OG - Patch e Contrato Login 2026-10-17]] atualizado com v3 instalado, hashes, restore, evidência x86 e source de autenticação/API/seeds. Contexto v2 preservado como histórico; nota Auth e MOC corrigidos para evitar releitura/uso de conclusão antiga.
+-13 testes de patch,35GS,5Token,31Python captura e2568checks crypto passaram; leitura dos arquivos live conferida. Sem restart do servidor, integração positiva MySQL ou validação visual do jogo. Dívidas restantes registradas em [[Knowledge Debt]].
 
 ## 2026-10-09 - Instalação do Strix para auditoria autorizada
 

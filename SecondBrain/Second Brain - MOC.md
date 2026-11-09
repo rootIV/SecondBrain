@@ -3,7 +3,7 @@ tags:
   - second-brain
   - moc
   - knowledge-management
-updated: 2026-09-28
+updated: 2026-11-02
 ---
 
 # Second Brain - MOC
@@ -17,6 +17,7 @@ Mapa operacional do vault. Este arquivo e o ponto de entrada para agentes e manu
 - [[Consent - MOC]]: produto de confianca digital para acordos mutuos, consentimento dinamico e Safety Mode.
 - [[MotionInBet - MOC]]: API .NET, bot Windows Forms/Selenium, website React e fluxo de assinaturas via Pix/Mercado Pago.
 - [[EvoCine - MOC]]: landing Next.js, checkout PIX, entrega protegida do APK e recuperação por e-mail.
+- [[A90 Performance - MOC]]: diagnóstico ADB somente-leitura, baseline de desempenho e investigação Android 14 reversível.
 
 ## Carreira
 
@@ -24,6 +25,7 @@ Mapa operacional do vault. Este arquivo e o ponto de entrada para agentes e manu
 
 ## Ambiente Codex
 
+- [[Preferencias de Engenharia e Reverse Engineering]]: avaliar referencias pelo merito tecnico, melhorar implementacoes com justificativa e salvar nomes de funcoes/labels durante analises no Ghidra/x64dbg.
 - [[Codex Pet Nexo]]: instalacao, contrato v2, animacoes validadas e limite da integracao com consumo dinamico.
 
 ## Governanca

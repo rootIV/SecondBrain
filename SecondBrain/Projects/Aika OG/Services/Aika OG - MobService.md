@@ -3,7 +3,7 @@ tags:
   - project/aika-og
   - service
   - mob
-updated: 2026-07-11
+updated: 2026-10-10
 ---
 
 # Aika OG - MobService
@@ -57,7 +57,7 @@ Arquivo: `GameServer/Application/Services/MobService.cs`
 - Mobs estaticos/boss-like nao patrulham quando destino real e igual ao spawn, quando `IsMutant`, quando `IsService`, ou quando nao existe rota valida.
 - Ao perder alvo, morrer alvo, sair da area de perseguicao ou afastar demais do spawn, o mob limpa threat, volta ao spawn e restaura `CurrentHealth = InitialHealth`.
 - Proximidade so cria threat automaticamente para mobs hostis (`MobType > 1024`) e nao cria para `IsService`, `IsMutant` ou `MobType = 1024`. Mobs passivos ainda atacam normalmente depois que recebem threat explicito por dano.
-- AI de mobs usa batch round-robin quando ha muitos mobs ativos, evitando `OrderBy(Random)` por tick.
+- AI de mobs atualiza mobs proximos de jogadores, em aggro, em retorno ou com threat em todo tick nominal de 500 ms. Somente mobs distantes sem combate usam batch round-robin quando ha muitos ativos.
 - O loop de AI busca candidatos por `WorldGrid` ao redor do mob e preserva alvos ja presentes na threat table via indice de sessao.
 - Quando mob move, reseta ou respawna, `WorldEntitySpatialIndex.UpsertMob` precisa ser chamado para manter visibilidade correta.
 - Movimento/dano/spawn de mob reutilizam pacote `byte[]` quando o payload e identico para multiplos destinatarios.
@@ -66,6 +66,16 @@ Arquivo: `GameServer/Application/Services/MobService.cs`
 - A Atracao Divina reposiciona mob valido para 1.5m do caster, chama `WorldEntitySpatialIndex.UpsertMob` e aplica root por 3s. Service/static/mutant/dead nao devem ser puxados.
 
 ## Pontos de cuidado
+
+### Patrulha independente — 2026-10-10
+
+- Corrigidas tres causas de movimento em grupo: espera reaplicada a cada passo, destino recalculado por proximidade (oscilacao na volta) e round-robin que atrasava atualizacoes de mobs visiveis.
+- `MobEntity.PatrolReturningToSpawn` mantem a direcao durante todo o trecho. `NextPatrolMoveAt` guarda a proxima partida; `LastMoveTime` continua limitando os passos a um por tick.
+- A primeira partida e as partidas apos chegada respeitam `InitialMoveWait`/`DestinationMoveWait` (fallback de 8s), com jitter independente de 0.5s ate 4.5s adicionais, limitado conforme a espera configurada. Durante o trecho nao existe espera de patrulha entre passos.
+- O mob parte da posicao atual, chega ao destino configurado, aguarda e volta ate a posicao inicial. A ida e a volta de patrulha nao restauram HP. O retorno de combate conserva seu reset/cura e reinicia o ciclo; respawn limpa a direcao e o agendamento anteriores.
+- Preservados passo de movimento, `MoveSpeed`, layout/opcode `0x301`, regras de aggro, root, stun e mobs estaticos/service/mutant. Sem mudanca de pathfinding ou geometria de mapa.
+- Verificacao: quatro regressoes reproduziram os defeitos antes da correcao; suite completa `GameServer.xUnitTest` passou com 407 testes, sem falhas ou skips. Saida de build isolada em `.testbin/mob-patrol/` para preservar o GameServer em execucao.
+- Pendente: recompilar/reiniciar o GameServer ativo e observar no cliente a continuidade visual, as pausas independentes e a volta completa. A validacao automatizada confirma estado/trajeto do servidor, sem comprovar a animacao renderizada pelo cliente.
 
 - Muitos campos ainda sao `Unk` e devem ser tratados como contrato observado.
 - Alterar ordem ou tamanho dos blocos de buff/title pode quebrar renderizacao do cliente.

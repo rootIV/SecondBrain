@@ -3,10 +3,22 @@ tags:
   - project/aika-og
   - references
   - graphify
-updated: 2026-07-08
+updated: 2026-11-03
 ---
 
 # Aika OG - Referencias Externas AikaEmu e Delphi
+
+## Referências atuais de combate e IA — 2026-11-03
+
+- Nova: `D:\aika\AIKA Source` (`AikaServer.dpr`, 49 unidades explícitas, 58 fontes PAS em Src). BaseMob/MOB/Player/threads/handlers e dados StatusPoint investigados, sem executar o fork.
+- Raízes atuais comparadas: `D:\aika\Aika Lore Community\Server`, `D:\aika\Aika Rafinha Server`, `D:\aika\Aika TheMu New`, `D:\aika\AikaEmu-master\src\AikaEmu.GameServer`; projeto atual `C:\Projetcts\aika-og`. Os caminhos Vitor abaixo são históricos, não a raiz atual.
+- [[Aika OG - IA Combate e Niveis Referencias 2026-11-03]]: comparação com funções/linhas e hashes; sem multiplicador direto de delta de nível no impacto atual, efeitos indiretos por progressão, influência separada no controle/XP, IA e fórmulas próprias dos forks.
+- Não adicionar automaticamente um perfil de runtime com a nova source: cadastro de referência técnica não equivale a importação de catálogos, alteração de fórmula ou ativação de gameplay.
+
+## Criterio de uso das referencias
+
+- Aplicar [[Preferencias de Engenharia e Reverse Engineering]]: referencias ajudam a investigar contratos e formatos, mas cada implementacao precisa de avaliacao critica de corretude, algoritmos, desempenho, seguranca e manutencao.
+- Preferir uma solucao melhor quando houver justificativa tecnica; nao portar automaticamente hardcodes, TODOs ou estruturas ineficientes. Preservar layouts/opcodes/criptografia comprovados e validar alteracoes com o cliente conforme [[Aika OG - MOC]].
 
 ## Graphify
 

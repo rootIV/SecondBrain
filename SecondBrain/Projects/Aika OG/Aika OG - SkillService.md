@@ -3,10 +3,12 @@ tags:
   - project/aika-og
   - game-server
   - skills
-updated: 2026-07-08
+updated: 2026-10-12
 ---
 
 # Aika OG - SkillService
+
+Atualização2026-10-12: [[Aika OG - Dual e Cast Nativo 2026-10-12]] corrige classificação da dual, alcance/área e cast real com0x320→0x302/cancelamento0x327. Evidência nativa confirma SelfAnimation+344 distinto de Anim+356; substitui o entendimento antigo dos offsets. MySQL reparado com backup, suíte568 aprovados/zero falhas/três skips e build concluída; validação visual após iniciar a build permanece pendente.
 
 ## Escopo implementado
 
@@ -37,23 +39,23 @@ Sistema inicial de skills no `GameServer`: skills iniciais do personagem, uso Pv
   - registra cooldown runtime em `CharacterEntity.SkillCooldowns`;
   - envia `0x320` criptografado com `SkillPacketFactory`;
   - envia animacao `0x31F` para o atacante e visiveis;
-  - no modo compativel v1, `CastTime > 0` executa instantaneamente ate existir fila real de cast;
+  - `CastTime > 0` aguarda0x302 após o prazo, mantendo cast pendente e sem aplicar efeito antecipado;
   - executa dano reaproveitando `CombatService` e pacote `0x102`;
   - quando a skill tem duracao e efeitos, aplica buff/debuff runtime e envia `0x16F`;
   - quando a skill e de cura simples, aumenta HP sem passar do maximo e envia refresh de HP/status.
 
 ## Buffs e debuffs PvE v1
 
-- Modelo runtime: `ActiveBuffEntity`, usado por personagem e mob, com ate `60` slots.
+- Modelo runtime: `ActiveBuffEntity`, usado por personagem e mob, com ate `40` slots, conforme o client OG verificado em 2026-10-10.
 - Campos principais: `SkillId`, `SkillIndex`, `StartedAt`, `EndsAt`, `SourceId`, `EffectIds[4]`, `EffectValues[4]` e flag `IsDebuff`.
 - `BuffService.AddBuff` segue a ideia Delphi:
   - ignora buffs bloqueados conhecidos (`7257`, `9133`);
   - substitui buff anterior equivalente por `UniqueType` quando `UniqueType > 0`; caso contrario, por `SkillData.Index`/`SkillId`;
-  - ocupa o primeiro slot livre ate o limite de `60`;
+  - ocupa o primeiro slot livre ate o limite de `40`;
   - calcula `EndsAt` a partir de `SkillData.Duration`;
   - remove expirados via tick de `CharacterRegenerationService`/`MobAiService`.
 - Packets Delphi/Rafinha:
-  - `0x16E`: refresh completo, com `60` ids de buffs e `60` tempos restantes em segundos (`TSendBuffsPacket`, size `372`);
+  - `0x16E`: refresh completo nativo OG, com `40` ids WORD em +12 e `40` tempos DWORD em +92; size `252`. O formato antigo de 372 bytes era ignorado pelo client; ver [[Aika OG - Buff Refresh e Opcodes 2026-10-10]].
   - `0x16F`: add/update individual com `Buff: DWORD`, `RemainingSeconds: DWORD`, `Unk: DWORD` (`TUpdateBuffPacket`, size `24`).
   - Importante: o cliente interpreta o campo de tempo como duracao restante, nao como timestamp Unix absoluto. Enviar `EndsAt`/Unix time faz o cliente exibir duracoes absurdas, como centenas de meses.
 - Ao aplicar buff via skill ou comando `.effect`, o servidor deve enviar animacao `0x31F` usando `SkillData.Anim/SelfAnimation`, depois `0x16F` e refresh de status.
@@ -140,7 +142,7 @@ Em 2026-07-06, o GameServer passou a carregar `Data\SkillBehaviors.json` no boot
 - `CastTime`: `320`
 - `TargetAnimation`: `348`
 - `Anim`: `356`
-- `SelfAnimation`: usa o campo Delphi `Anim` no offset `356`; o offset `344` pertence ao bloco desconhecido anterior e nao deve ser usado como animacao propria.
+- `SelfAnimation`: offset `344`, confirmado no AikaClient.exe atual. `Anim` em `356` é distinto e preservado; a associação anterior entre os campos foi corrigida em2026-10-12.
 - `Description`: `428`, tamanho `288`
 
 ## Limites desta etapa
@@ -148,7 +150,7 @@ Em 2026-07-06, o GameServer passou a carregar `Data\SkillBehaviors.json` no boot
 Nao foram portados ainda:
 
 - AoE;
-- cast time real;
+- fases especiais de cast distintas do fluxo normal0x320→0x302;
 - passivas especiais/complexas;
 - PvP;
 - IA de mob usando skill;

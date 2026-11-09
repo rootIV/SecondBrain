@@ -1,0 +1,11 @@
+# Aika OG - Instalação Schema Relíquias 2026-10-21
+
+Erro reproduzido no banco local `aikaria`: a extensão `relics` exigida no bootstrap do GameServer ainda não estava instalada. Corrigido em manutenção pelo comando existente `dotnet run --project Database -- install-relics`, preservando a proteção de startup e sem alteração de código/protocolo.
+
+Criadas `relic_world` e `relic_events` em InnoDB; versão 1 registrada. Instalação repetida com sucesso e todas as validações de schema do bootstrap aprovadas contra o banco real. Tabelas/engines anteriores, extensões e checksums de contas, personagens, inventário e guildas preservados. Evidências em `artifacts/relic-schema-install-20261021/`; snapshots não são dump completo. GameServer/Studio permaneceram parados; gameplay não validado.
+
+[Relatório e comando](C:/Projetcts/aika-og/docs/operations/RELIC-SCHEMA-INSTALL-2026-10-21.md). Relacionado a [[Aika OG - Grupo Solo Menus NPC 2026-10-21]] e [[Aika OG - MOC]].
+
+Validação final da correção de cidadania: GameServer Debug compilado sem erros/warnings; suíte completa com 1.536 aprovados, 10 ignorados e zero falhas. Artefato `relic-neutral-full.trx`. Os testes cobrem a expiração neutra, reinício sem renovar deadline, abertura somente após cidadania e rejeição de relíquia aberta com deadline forjado.
+
+Correção posterior: a relíquia selada 6114 de um personagem legado sem cidadania (nação 0) causava “Nação inválida” na reconciliação. Nação 0 agora é válida apenas para selo carregado, com deadline e sem roubo; abertura, chão e Devir continuam restritos a nações 1–5. Sem atribuir cidadania ou apagar o item, a primeira reconciliação registra 20 minutos, preservados nos reinícios. Remover o selo exige cidadania atual lida na transação e canal nacional válido. Três reproduções falharam antes da correção; testes focados e smoke real de inicialização passaram após a correção. Binário Debug atualizado; GameServer parou após ENTER com exit code 0, TokenServer preservado. Stderr de encerramento contém quatro `Unhandled exception.` sem stack; o smoke não valida stderr, portanto não certifica ausência de erros ao parar. Hipótese de callback de accept cancelado ainda não confirmada; rede preservada, acompanhamento em [[Knowledge Debt]]. Gameplay pendente.

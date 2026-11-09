@@ -28,7 +28,7 @@ Arquivo: `GameServer/Application/Services/CharacterService.cs`
 - `CharacterRuntimeStateService`: salva estado runtime antes de trocar personagem, desconectar ou apos respawn.
 - `CharacterRegenerationService`: roda tick de 1 segundo e regenera HP/MP somente depois de 10 segundos sem ataque enviado ou recebido.
 - `CharacterMovementService`: trata rotacao, movimento, atualizacao de `WorldGrid`, broadcast para visiveis e refresh de mobs/NPCs.
-- `ChatCommandService`: separa parsing de chat/comandos debug do handler. Comandos de desenvolvimento atuais: `.item <id> [quantidade]`, `.title <id>` e `.effect <skillDataId>`.
+- `ChatCommandService`: separa parsing de chat/comandos debug do handler. Comandos de desenvolvimento atuais: `.item <id> [quantidade]`, `.title <id>`, `.effect <skillDataId>`, `.hp` e `.mp`.
 
 ## Dependencias
 
@@ -81,6 +81,7 @@ Arquivo: `GameServer/Application/Services/CharacterService.cs`
 - Uso de skill, benção/buff, teleporte e outras recalculagens devem usar `CharacterRefreshService.SendFullRefresh` em vez de reenviar apenas HP/MP.
 - `.title <id>` concede o titulo em nivel 1 caso o personagem ainda nao possua, ativa `ActiveTitle/ActiveTitleLevel`, envia `0x361`, reenvia a lista `0x1086`, recalcula status, persiste titulos e salva runtime state.
 - `.effect <skillDataId>` interpreta o id como entrada de `SkillData`/buff, aplica via `BuffService`, envia animacao `0x31F` quando `SkillData.Anim/SelfAnimation` existir, envia `0x16F` para o proprio jogador e visiveis e dispara full refresh. Nao e id bruto de `EF_*`.
+- `.hp` e `.mp` (restritos a `GameMaster`/`Admin`) recalculam o status do personagem vivo, alteram `CurrentHealth` para `1` (`1/MaxHealth`) ou `CurrentMana` para `1` (`1/MaxMana`) preservando o outro vital, enviam full refresh (`0x103`, `0x109`, `0x10A`, `0x108`), salvam o runtime state e confirmam no chat (`0x984`) para facilitar testes de poções de HP/MP.
 - `CharacterStatusService` aplica efeitos fixos do template (`EF`/`EFV`) e efeitos randômicos salvos no item equipado; os efeitos randômicos seguem a regra Delphi de `Value * 2`.
 - `CharacterStatusService` preserva atributos base do banco e calcula atributos efetivos runtime (`EffectiveStrength`, `EffectiveAgility`, `EffectiveIntelligence`, `EffectiveConstitution`, `EffectiveLuck`) com efeitos de equip/set. `0x109` e o bloco de status do `0x925` enviam os efetivos quando disponiveis.
 - Equip com `MaxValue > 0` e `MinimalValue == 0` e tratado como quebrado para status: nao soma atributos, ataque, defesa, HP/MP ou efeitos.

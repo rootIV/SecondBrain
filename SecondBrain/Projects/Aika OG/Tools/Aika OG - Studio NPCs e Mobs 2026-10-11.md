@@ -1,0 +1,52 @@
+---
+title: Aika OG - Studio NPCs e Mobs 2026-10-11
+date: 2026-10-11
+tags:
+  - project/aika-og
+  - tooling
+  - reverse-engineering
+status: implementado-validado-localmente
+---
+
+# Studio NPCs e Mobs
+
+Relacionadas: [[Aika OG - Aika Studio Web]], [[Aika OG - Imagens de Mapas 2026-10-11]], [[Aika OG - MobService]], [[Aika OG - NPC Titulos e Menus 2026-10-10]].
+
+- Abas NPCs e Mobs em `C:\Projetcts\aika-og\AikaStudio`. NPCs verdes; exclamações piscantes seguem QuestMark 9/2/8/11 (verde/azul/vermelho/amarelo). Movimento reduzido desativa a animação. NPCs com nome numérico são resolvidos por índice em `UI/MN.bin`, sem mudar o ID SQL.
+- Associação de missões usa `Data/Quest/Quests.csv`, com nomes/diálogos complementados por `UI/quest.bin`. Há 34 associações não vazias no catálogo atual; 17 IDs não têm definição correspondente neste cliente. Mantê-los visíveis com nome ausente. O cabeçalho do cliente não permite associar diretamente NPCs ao ID runtime de `npcs`: offset 4 contém referências pequenas, incompatíveis com IDs 2048+. Não reaplicar o layout Delphi antigo como prova da associação atual. Disponibilidade por personagem não é simulada.
+- Loja edita exatamente 40 slots (5 colunas por 8 linhas) em `npc_store_items`. Trocar/mover preserva buracos, quantidade de slots e posição; não compactar. Alterar itens não altera preço, moeda, StoreType ou receitas especiais. Reutiliza ícones e catálogo existente.
+- Diálogo exige escolha explícita de slot, não mapear TalkId/seletor por suposição. Reutiliza BinaryDocument/cifra Skill e stride 5508: 40 linhas Windows-1252 de até 127 bytes. Preserva bytes desconhecidos e registros vizinhos; requer cliente e GameServer fechados, revisão, motivo, backup .bak e auditoria JSON.
+- Mobs são instâncias de `mob_spawns`, não templates. Patrulha configurada tem spawn/destino e ida/volta; não é movimento capturado nem combate. Arrastar/clique no mapa ou coordenadas/direção/distância editam o rascunho. Spawn sincroniza `initial_position_*` com `position_*` ao gravar. Destinos e esperas permanecem explícitos; espera zero usa a regra da IA (8 segundos mais variação).
+- Atributos são editados separadamente em `mob_templates`: HP, nível, ataques, defesas, velocidade, respawn, EXP e rotação. Afetam todas as instâncias em todos os mapas. Velocidade/rotação mantêm unidades nativas.
+- SQL exige InnoDB, manutenção, motivo, transação, lock de registro e snapshot concorrente; backup antes/depois em `artifacts/studio/world`. Reiniciar GameServer para carregar o catálogo. Não sincroniza CSVs. Desde 2026-10-12, rascunhos de lojas/patrulhas/atributos sobrevivem à navegação entre abas, mapas e seleções; atualização continua bloqueada. Ver a seção de lote abaixo.
+- Mapas usam retângulos de Map.bin e texturas JIT nativas; cortam apenas padding preto final. Projeção inicial inverte Y; calibração por cliente/mapa salva em `artifacts/studio/maps/calibrations.json`, sem modificar assets, com backup e versão. Filtro de entidades usa coordenadas: regiões sobrepostas podem compartilhar pontos. Confirmar alinhamento em regiões novas antes de edição.
+
+Verificação: 29 testes Studio aprovados com MySQL habilitado, incluindo clone temporário removido, slots esparsos, conflitos, item inválido, spawn/template, diálogo temporário, calibração isolada e preservação das missões quando quest.bin estiver ausente. Build TypeScript/Vite, lint, quatro testes existentes do frontend e teste de geometria aprovados. Browser confirmou loja, diálogos, direção/distância, clique/arraste no mapa, atributos compartilhados, persistência de rascunho e bloqueio de troca de mapa; larguras 320/768/1024/1440/2560 sem overflow horizontal nem erros/warnings de console. Gravações de QA ocorreram somente no clone MySQL e em arquivos temporários. Gameplay após edição e alinhamento de todos os mapas não foram validados. Resolver de arquivos corrigido para distinguir ausência de reparse point, mantendo bloqueio de links (inclusive quebrados).
+
+Operação e limites: `C:\Projetcts\aika-og\AikaStudio\README.md`. Capturas: `C:\Projetcts\aika-og\output\playwright\npcs-desktop.png` e `mobs-desktop.png`.
+
+Graphify atualizado localmente por AST, sem LLM: 3982 nodes, 10965 edges e 210 comunidades; 19 nodes referenciam WorldWorkspace. SQL continua fora do grafo por ausência de tree_sitter_sql; não foi instalado pacote adicional. Cache antigo rastreado preservado; nenhuma alteração de grafo foi commitada.
+
+## Organização e edição visual — 2026-10-11
+
+- Lista de mobs começa agrupada por `templateId`, preservando espécies com nomes iguais e templates diferentes. Ao abrir uma espécie, exibe apenas suas instâncias no mapa atual. Voltar fica à esquerda de Atualizar e bloqueia saída com rascunho de patrulha/atributos.
+- Zoom de 100% a 800%, roda ancorada no cursor, navegação por arraste do fundo ampliado e Ajustar mapa. Coordenadas usam inversa de getScreenCTM; zoom/pan não alteram dados. Barra parte do spawn e termina no destino: corpo/grip gira preservando distância inicial do gesto; destino altera direção e distância. Setas giram 5°. Arredondamento de coordenadas é 0,01 unidade.
+- Loja passou do drag HTML nativo para Pointer Events com captura, limite de 5 px para distinguir clique, destino destacado e cancelamento fora da grade. Imagens não iniciam drag próprio. Clique simples continua abrindo preço; 40 slots e buracos permanecem preservados. O relato de falha não se reproduziu no Chrome local; a mudança remove a dependência do drag nativo, mas a causa específica do navegador do usuário não foi confirmada.
+- Verificação: frontend build/lint, testes de geometria/agrupamento/zoom e quatro testes de importação; browser validou arraste por ícone/nome e toque emulado por CDP, cancelamento fora da grade, troca com slot vazio, clique de preço, 46 Max_Filhote no Verband, rotação por teclado/ponteiro, distância, proteção de Voltar, zoom/pan e precisão de spawn, larguras 320/768/1024/1440/2560. Console sem erros/warnings. QA só alterou rascunhos; sem gravação SQL. Backend e gameplay não foram retestados nesta alteração de interface.
+
+## Lote em manutenção e marcadores — 2026-10-12
+
+- `POST /api/world/batch` reúne lojas de NPCs, patrulhas e templates. Até 500 registros distintos; allowlist de campos e limites existentes, motivo, manutenção, lock ordenado, snapshot concorrente, backup único antes/depois e uma transação InnoDB. Conflito ou erro SQL não efetiva parte do lote. APIs de gravação individual reutilizam o mesmo caminho e conservam a resposta `{ backup, snapshot }`.
+- Cada aba mantém seu lote. Troca de mob, espécie ou mapa guarda o rascunho; retornar restaura o snapshot original e as edições. Atributos compartilhados são identificados por template, sem duplicar quando outra instância é escolhida. Atualizar e alinhar continuam protegidos. Preços e diálogos permanecem separados. Rascunhos são locais à página, sem persistência após recarregar/fechar.
+- Efetivar mudanças abre uma revisão única, com motivo e confirmação de manutenção. Parar/reiniciar o GameServer uma vez por lote; não há hot reload nem sincronização CSV. Falha preserva o lote; sucesso limpa apenas após a resposta da transação.
+- Esc desmarca o mob e guarda o rascunho; em revisão aberta, fecha primeiro o diálogo. Marcadores de mobs compensam zoom; a seleção usa círculo azul Spawn e losango amarelo Destino, sem círculo amarelo ampliado, ponta de seta ou grip sobreposto. Pontos aceitam arraste e teclado; barra invisível sobre a linha conserva rotação.
+- Verificação: 69 testes Studio aprovados, uma integração de cadastro opt-in não habilitada; MySQL de lote em clone descartável, incluindo conflito e rollback após erro SQL. TypeScript/Vite/lint e testes de rascunhos/geometria aprovados. Browser: múltiplas patrulhas/atributos, navegação, desfazer individual, Esc, revisão e erro/sucesso simulados, 320/768/1024/1440/2560 sem overflow e console limpo. Diâmetro de mob medido em 9,84 px tanto em 100% quanto em 800%. Nenhuma edição de QA no banco de operação; gameplay não validado.
+- Caveat de testes: definir `AIKAOG_DATABASE` explicitamente ao habilitar toda a suíte MySQL; alguns testes restauram a variável a null depois que LocalSecretsLoader já carregou o arquivo uma vez. Ver [[Knowledge Debt]].
+
+## Preços dos itens nas lojas — 2026-10-11
+
+- Nome visível em cada slot e no tooltip do ícone. Clicar abre preço em gold ou item de troca pesquisável por nome/ID e quantidade; Ceifador #26902 mostra Caveira II #26901 × 7500. O preço pertence ao template, portanto afeta todas as lojas que oferecem esse item. Arrastar/trocar slots continua separado da gravação do preço.
+- `ItemPrices` sincroniza `price_honor`, `price_medal`, `price_gold`, `type_price_item` e `type_price_item_value` no SQL, no ItemList cifrado do client selecionado e no `Data/ItemList.bin` decodificado. Reutiliza BinaryDocument para cifra/checksum e preserva revenda/demais bytes. Não permitir edição se registros do item/moeda divergirem entre os três catálogos, moeda inválida, versão antiga ou rascunho pendente no editor de ItemList.
+- Gold positivo uint32; ID/moeda nativos válidos e quantidade uint16 positiva. Gravar substitui honra/medalhas pela forma escolhida. Manutenção, motivo e este client fechado; reiniciar client e GameServer. Backups dos dois arquivos e auditoria SQL antes/depois em `artifacts/studio/world/*-price-*`. Falha de escrita restaura arquivos e faz rollback SQL; interrupção abrupta ou commit de resultado incerto exige conferir destinos e restaurar pelo backup, pois não há transação distribuída.
+- Proteção de cliente aberto compartilhada usa QueryFullProcessImageName com acesso limitado, inclusive para cliente elevado, e compara a pasta normalizada. Não confundir o oficial aberto em outra pasta com o client que será gravado. Esc no modal preserva rascunho pendente; fechar requer salvar ou descartar explicitamente.
+- Verificação: 45 testes Studio aprovados, MySQL habilitado em clones isolados; gold/troca, conflitos, moeda inválida, rascunho de binário, divergência e restauração após arquivo bloqueado. Frontend build/lint e quatro testes de importação mais geometria aprovados. Browser confirmou nomes, campos, busca de Caveira II, Ceifador × 7500 e proteção de rascunho. Capturas em `output/playwright/shop-names.png`, `ceifador-price.png` e `ceifador-price-mobile.png`. Nenhum preço de produção foi alterado no QA; gameplay pós-edição permanece não validado.
